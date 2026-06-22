@@ -9,15 +9,12 @@
 <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;500;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
-    /* レトロで親しみやすいマットなカラーパレット */
     --desk-bg: #e3dccb;
     --device-body: #f5f5f5;
     --screen-bezel: #333333;
     --paper: #fdfdfd;
     --text-main: #4a4a4a;
     --text-sub: #888888;
-    
-    /* 任天堂っぽいポップなアクセントカラー */
     --n-red: #eb5c5c;
     --n-red-dark: #cc4545;
     --n-blue: #5cb8e6;
@@ -25,7 +22,6 @@
     --n-green: #8cc63f;
     --n-green-dark: #71a330;
     --n-yellow: #f2c94c;
-    
     --shadow-sm: 0 4px 0;
     --shadow-box: 0 8px 24px rgba(0,0,0,0.15);
   }
@@ -38,20 +34,17 @@
     color: var(--text-main);
     display: flex; align-items: center; justify-content: center;
     padding: 16px; min-height: 100%; overflow-x: hidden;
-    /* 机のような方眼ドット背景 */
     background-color: var(--desk-bg);
     background-image: radial-gradient(rgba(180, 170, 150, 0.5) 2px, transparent 2px);
     background-size: 24px 24px;
   }
 
-  /* ===== 共通の押しボタン（ゲームUI風） ===== */
   button {
     font-family: inherit; cursor: pointer; border: none; outline: none;
     transition: transform 0.1s, box-shadow 0.1s;
   }
   button:active { transform: translateY(4px) !important; box-shadow: 0 0 0 transparent !important; }
 
-  /* ===== ロック画面 ===== */
   .lock {
     width: min(384px, 100%);
     background: var(--device-body);
@@ -81,7 +74,6 @@
     box-shadow: var(--shadow-sm) var(--n-green-dark);
   }
 
-  /* さいきんのへや */
   .recent { margin-top: 24px; text-align: left; }
   .recent .lbl { font-size: 12px; font-weight: 800; color: var(--text-sub); margin-bottom: 8px; }
   .chips { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -96,7 +88,6 @@
   .chip .x { width: 20px; height: 20px; border-radius: 50%; background: #eee; color: #888; display: flex; align-items: center; justify-content: center; font-size: 12px; }
   .chip .x:hover { background: var(--n-red); color: #fff; }
 
-  /* ===== デバイス本体（DS風マットボディ） ===== */
   .device {
     width: min(440px, 100%);
     background: var(--device-body);
@@ -137,7 +128,6 @@
   .dotpulse { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--n-green); margin-right: 6px; vertical-align: middle; animation: pulse 1.5s infinite; }
   @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
 
-  /* ===== 画面（黒ベゼル） ===== */
   .screen {
     background: var(--screen-bezel);
     border-radius: 12px; padding: 12px;
@@ -145,15 +135,20 @@
     margin-bottom: 12px;
   }
 
-  /* 上画面の中身 */
   .top-inner {
     background: var(--paper); border-radius: 6px; aspect-ratio: 5/3;
     position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center;
   }
   .entry-img { max-width: 100%; max-height: 100%; }
+  
+  /* ページめくりアニメーション */
+  .slide-next { animation: slideNext 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+  .slide-prev { animation: slidePrev 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+  @keyframes slideNext { 0% { transform: translateX(30px); opacity: 0; } 100% { transform: translateX(0); opacity: 1; } }
+  @keyframes slidePrev { 0% { transform: translateX(-30px); opacity: 0; } 100% { transform: translateX(0); opacity: 1; } }
+
   .empty { text-align: center; color: #ccc; font-weight: 800; font-size: 15px; line-height: 1.6; padding: 0 20px; }
   
-  /* 上画面の装飾（アバター・日付など） */
   .date { position: absolute; left: 12px; top: 12px; font-weight: 800; font-size: 14px; color: #aaa; z-index: 4; }
   .date small { font-size: 12px; }
   .avatar { position: absolute; left: 8px; bottom: 8px; text-align: center; z-index: 4; }
@@ -173,7 +168,6 @@
   .nav:hover { background: var(--n-blue); }
   .nav.prev { left: 4px; } .nav.next { right: 4px; }
 
-  /* シェア行 */
   .shareRow { display: flex; gap: 12px; margin: 16px 0; }
   .shareRow button {
     flex: 1; font-weight: 800; font-size: 14px; padding: 12px; border-radius: 10px;
@@ -182,7 +176,6 @@
   #saveImg { background: #fff; border: 2px solid #ccc; color: var(--text-main); box-shadow: 0 4px 0 #ccc; }
   #shareImg { background: var(--n-blue); color: #fff; box-shadow: 0 4px 0 var(--n-blue-dark); }
 
-  /* 下画面の中身 */
   .bot-inner { background: #1a1a1a; border-radius: 6px; padding: 10px; display: flex; flex-direction: column; gap: 10px; }
   
   .who { display: flex; gap: 8px; align-items: center; justify-content: space-between; }
@@ -197,14 +190,12 @@
   .tab.on.aite { background: var(--n-blue); border-color: var(--n-blue); box-shadow: 0 3px 0 var(--n-blue-dark); }
   .hint { color: #888; font-size: 11px; font-weight: 800; }
 
-  /* キャンバス（手帳風） */
   .canvas-wrap {
     position: relative; background: #fdfdfd; border-radius: 4px;
     overflow: hidden; aspect-ratio: 5/3; border: 2px solid #555;
   }
   canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
 
-  /* ツール群 */
   .palette-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
   .colors { display: flex; gap: 6px; }
   .sw { width: 30px; height: 30px; border-radius: 50%; border: 3px solid transparent; transition: 0.1s; box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
@@ -239,7 +230,6 @@
   }
   .save svg { width: 20px; height: 20px; }
 
-  /* 設定モーダル */
   .modal {
     position: fixed; inset: 0; background: rgba(0,0,0,0.6);
     display: none; align-items: center; justify-content: center; z-index: 60; padding: 16px;
@@ -260,13 +250,11 @@
   .avopt.on { border-color: var(--n-red); background: #ffe3ea; }
   .done { width: 100%; padding: 14px; background: var(--n-green); color: #fff; border-radius: 10px; font-weight: 800; font-size: 16px; box-shadow: 0 4px 0 var(--n-green-dark); margin-top: 8px; }
 
-  /* ★ MiiメーカーパネルのUIスタイル ★ */
   .maker-panel { background: #e8e8e8; border-radius: 12px; padding: 16px; margin-top: 12px; display: none; border: 2px solid #ccc; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); }
   .maker-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; font-weight: 800; font-size: 14px; color: var(--text-main); }
   .maker-row button { background: #fff; border: 2px solid #ccc; border-radius: 6px; padding: 6px 14px; font-weight: 800; box-shadow: 0 3px 0 #ccc; color: var(--text-main); font-size: 16px;}
   .maker-row button:active { transform: translateY(3px) !important; box-shadow: 0 0 0 #ccc !important; }
 
-  /* トースト */
   .toast {
     position: fixed; left: 50%; bottom: 32px; transform: translateX(-50%) translateY(20px);
     font-weight: 800; font-size: 14px; color: #fff; background: rgba(0,0,0,0.8);
@@ -278,7 +266,6 @@
 </head>
 <body>
 
-  <!-- ロック画面 -->
   <div class="lock" id="lock">
     <div class="keyart">✏️</div>
     <h1>イラストこうかん日記</h1>
@@ -294,7 +281,6 @@
     </div>
   </div>
 
-  <!-- 本体 -->
   <div class="device hidden" id="device">
     <p class="brand">イラストこうかん日記</p>
 
@@ -309,9 +295,8 @@
 
     <div class="presence" id="presence">⚪ あいてを待っています...</div>
 
-    <!-- 上画面 -->
     <div class="screen">
-      <div class="top-inner">
+      <div class="top-inner" id="topInner">
         <img id="entryImg" class="entry-img" alt="日記" hidden />
         <div id="empty" class="empty">まだ日記がありません。<br>下のがめんに描いて<br>「日記を書く」をおそう！</div>
         <div id="avatar" class="avatar" hidden></div>
@@ -322,13 +307,11 @@
       </div>
     </div>
 
-    <!-- シェア -->
     <div class="shareRow">
       <button id="saveImg">この日記を保存</button>
       <button id="shareImg">シェアする</button>
     </div>
 
-    <!-- 下画面 -->
     <div class="screen">
       <div class="bot-inner">
         <div class="who">
@@ -353,14 +336,22 @@
         </div>
 
         <div class="subrow">
+          <span class="cap">ペン</span>
+          <button class="mini-btn on" id="penNormal">ふつう</button>
+          <button class="mini-btn" id="penBold">ふとい</button>
+          <button class="mini-btn" id="penMarker">マーカー</button>
+        </div>
+
+        <div class="subrow">
           <span class="cap">はいけい</span>
           <button class="mini-btn on" data-bg="plain">むじ</button>
           <button class="mini-btn" data-bg="line">けいせん</button>
           <button class="mini-btn" data-bg="grid">ほうがん</button>
           <button class="mini-btn" data-bg="frame">わく</button>
+          <button class="mini-btn" id="bgPhotoBtn" style="color:var(--n-blue); border-color:var(--n-blue);">しゃしん</button>
+          <input type="file" id="bgPhotoInput" accept="image/*" style="display:none;">
         </div>
         
-        <!-- スタンプ一覧 -->
         <div class="subrow">
           <span class="cap">スタンプ</span>
           <span id="stamps" style="display:flex; gap:6px; flex-wrap:wrap;"></span>
@@ -374,7 +365,6 @@
     </div>
   </div>
 
-  <!-- 設定モーダル -->
   <div class="modal" id="modal">
     <div class="sheet">
       <h2>なまえと アバター</h2>
@@ -383,7 +373,6 @@
         <input id="inMe" maxlength="10" placeholder="なまえ" />
         <div class="avgrid" id="avMe"></div>
         
-        <!-- オリジナル顔を作る（Miiメーカー） -->
         <div class="maker-panel" id="makerPanel">
            <div style="text-align:center; margin-bottom:12px;">
               <div id="makerPreview" style="display:inline-block; width:72px; height:72px; background:#fff; border:2px solid #ccc; border-radius:12px; box-shadow:0 3px 0 #ccc; overflow:hidden;"></div>
@@ -404,10 +393,22 @@
     </div>
   </div>
 
+  <div class="modal" id="resumeModal">
+    <div class="sheet" style="text-align:center;">
+      <h2 style="font-size: 16px; padding-bottom: 8px;">前回のへやに入りますか？</h2>
+      <p style="font-weight:800; font-size:15px; color:var(--text-main); margin-bottom:24px;">
+        へや: <b id="resumeRoomNo" style="color:var(--n-red);">----</b>
+      </p>
+      <div style="display:flex; gap:12px;">
+        <button class="done" style="background:#888; box-shadow:0 4px 0 #666; margin-top:0;" id="btnGoTitle">タイトルへ</button>
+        <button class="done" style="margin-top:0;" id="btnResume">へやに入る</button>
+      </div>
+    </div>
+  </div>
+
   <div class="toast" id="toast">かけたよ！</div>
 
 <script>
-/* ===== ▼ Firebase（きょうゆうモード）せってい ▼ ===== */
 const firebaseConfig={
   apiKey:"AIzaSyCVBZ01OOTvT5r7ZslWEqSH56H6ZusFAXg",
   authDomain:"ilust-d95a4.firebaseapp.com",
@@ -452,16 +453,12 @@ function fbAttach(key){
 }
 function fbDetach(){try{_unsubE&&_unsubE();}catch(_){}try{_unsubP&&_unsubP();}catch(_){}try{myPresRef&&_fb.remove(myPresRef);}catch(_){}if(_tsUpd){clearInterval(_tsUpd);_tsUpd=null;}entriesRef=presRef=myPresRef=_unsubE=_unsubP=null;}
 
-/* ========= アバター生成機能（オリジナル顔対応） ========= */
 function avatarSVG(id){
-  // オリジナル（Miiメーカー）で作成された顔の場合
   if(typeof id === 'string' && id.startsWith('c:')){
     const p = id.split(':');
     const h = parseInt(p[1]||0), e = parseInt(p[2]||0), m = parseInt(p[3]||0), s = parseInt(p[4]||0);
     const skins = ['#ffe0c4', '#ffe2cf', '#ffe5d2', '#e0b896', '#fff0e2', '#d4a373'];
     const skin = skins[s] || skins[0];
-
-    // パーツ素材
     const hairs = [
       '<path d="M9 26c0-11 6-17 15-17s15 6 15 17v6c0 2-2 3-4 3H13c-2 0-4-1-4-3z" fill="#3a2f2a"/>',
       '<path d="M11 21c1-8 6-12 13-12s12 4 13 12c-2-4-6-6-13-6s-11 2-13 6z" fill="#5b3a25"/>',
@@ -495,7 +492,6 @@ function avatarSVG(id){
     '</svg>';
   }
 
-  // プリセットの顔
   const A=[
     '<g><path d="M9 26c0-11 6-17 15-17s15 6 15 17v6c0 2-2 3-4 3H13c-2 0-4-1-4-3z" fill="#3a2f2a"/><circle cx="24" cy="26" r="13" fill="#ffe0c4"/><path d="M11 22c0-9 5-14 13-14s13 5 13 14c-3-3-7-4-13-4s-10 1-13 4z" fill="#3a2f2a"/><path d="M16 27q2 2 4 0M28 27q2 2 4 0" stroke="#5a4a42" stroke-width="1.8" fill="none" stroke-linecap="round"/><path d="M21 33q3 2 6 0" stroke="#c4757a" stroke-width="1.8" fill="none" stroke-linecap="round"/><circle cx="17" cy="31" r="2.2" fill="#ffb3b3" opacity=".7"/><circle cx="31" cy="31" r="2.2" fill="#ffb3b3" opacity=".7"/><path d="M14 38h20v6H14z" fill="#e8506f"/></g>',
     '<g><circle cx="24" cy="25" r="13" fill="#ffe2cf"/><path d="M11 21c1-8 6-12 13-12s12 4 13 12c-2-4-6-6-13-6s-11 2-13 6z" fill="#5b3a25"/><circle cx="18" cy="25" r="1.9" fill="#4a3a32"/><circle cx="30" cy="25" r="1.9" fill="#4a3a32"/><path d="M20 31q4 3 8 0" stroke="#b56b6b" stroke-width="1.8" fill="none" stroke-linecap="round"/><circle cx="16" cy="29" r="2.1" fill="#ffc1b0" opacity=".7"/><circle cx="32" cy="29" r="2.1" fill="#ffc1b0" opacity=".7"/><path d="M14 38h20v6H14z" fill="#3f7fe0"/></g>',
@@ -508,16 +504,16 @@ function avatarSVG(id){
 }
 const AV_COUNT=6;
 
-/* ========= 状態 ========= */
 const COLORS=["#3a3540","#eb5c5c","#5cb8e6","#8cc63f","#f2c94c","#ffffff"];
 const STAMPS=["⭐","❤️","🌸","😊","🎀","🐱","🍀","✨"];
 let mode='pen', penColor=COLORS[0], currentStamp={type:'emoji',val:STAMPS[0]};
+// ペンの種類
+let penType='normal'; 
 let clientId='', presKey=null;
 const miiCanvas=[];
 
 function avatarDataURI(id,px){return 'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(avatarSVG(id).replace('<svg ',`<svg width="${px}" height="${px}" `));}
 
-// オリジナルMiiやプリセットの顔をスタンプとして素早く押せるようにキャッシュする
 function preloadCustomMii(id){
   if(miiCanvas[id]) return;
   const im = new Image();
@@ -532,6 +528,7 @@ function preloadCustomMii(id){
 let author='me'; let entries=[], viewIdx=0;
 let roomStoreKey=null, currentWord='';
 let bgType='plain', latestLen=0, badgeN=0;
+let currentBgPhoto=null; // 背景写真用
 const undoStack=[];
 let profile={ me:{name:'じぶん',avatar:0}, you:{name:'あいて',avatar:1} };
 let recent=[];
@@ -543,7 +540,6 @@ function hashRoom(text){
   return { key:'nikki:room:r'+h.toString(36)+h2.toString(36), number:(h%900000+100000) };
 }
 
-/* ========= Canvas ========= */
 const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
 const bg=document.getElementById('bg'),bx=bg.getContext('2d');
 const DPR=Math.min(window.devicePixelRatio||1,2.5);
@@ -557,6 +553,16 @@ function fitCanvas(){
 function drawTemplate(){
   const w=bg.width,h=bg.height; bx.clearRect(0,0,w,h);
   bx.fillStyle='#fdfdfd'; bx.fillRect(0,0,w,h);
+  
+  if(currentBgPhoto){
+    // 写真下敷き描画
+    const r = Math.min(w/currentBgPhoto.width, h/currentBgPhoto.height);
+    const dw = currentBgPhoto.width*r, dh = currentBgPhoto.height*r;
+    bx.globalAlpha = 0.4;
+    bx.drawImage(currentBgPhoto, (w-dw)/2, (h-dh)/2, dw, dh);
+    bx.globalAlpha = 1.0;
+  }
+  
   bx.strokeStyle='rgba(120,110,160,.22)'; bx.lineWidth=Math.max(1,DPR);
   if(bgType==='line'){ for(let y=h/6;y<h;y+=h/6){ bx.beginPath();bx.moveTo(8,y);bx.lineTo(w-8,y);bx.stroke(); } }
   else if(bgType==='grid'){ const g=w/8; bx.strokeStyle='rgba(120,110,160,.16)';
@@ -573,6 +579,7 @@ function pos(e){const r=cv.getBoundingClientRect();return{x:(e.clientX-r.left)*D
 function pushUndo(){try{undoStack.push(ctx.getImageData(0,0,cv.width,cv.height));if(undoStack.length>20)undoStack.shift();}catch(_){}}
 function placeStamp(x,y){
   ctx.globalCompositeOperation='source-over';
+  ctx.globalAlpha=1.0;
   if(currentStamp.type==='emoji'){
     ctx.font=(46*DPR)+'px serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(currentStamp.val,x,y);
   } else {
@@ -580,7 +587,6 @@ function placeStamp(x,y){
     const src = miiCanvas[id];
     if(src){ ctx.drawImage(src,x-s/2,y-s/2,s,s); }
     else {
-      // 読み込みが間に合わなかった場合のフォールバック描画
       const im = new Image();
       im.onload = () => ctx.drawImage(im, x-s/2, y-s/2, s, s);
       im.src = avatarDataURI(id, 96);
@@ -588,28 +594,36 @@ function placeStamp(x,y){
   }
 }
 
-/* ★ ペン描画の滑らかさ処理 ★ */
+function getPenWidth(){
+  if(mode==='eraser') return 20*DPR;
+  if(penType==='bold') return 7*DPR;
+  if(penType==='marker') return 14*DPR;
+  return 3.5*DPR;
+}
+
 function start(e){const p=pos(e);
   if(mode==='stamp'){pushUndo();placeStamp(p.x,p.y);return;}
   drawing=true;pushUndo();lastX=p.x;lastY=p.y;
   ctx.globalCompositeOperation=mode==='eraser'?'destination-out':'source-over';
+  ctx.globalAlpha = (mode==='pen' && penType==='marker') ? 0.4 : 1.0;
   ctx.lineCap='round'; ctx.lineJoin='round';
   ctx.beginPath();ctx.fillStyle=mode==='eraser'?'rgba(0,0,0,1)':penColor;
-  ctx.arc(p.x,p.y,(mode==='eraser'?10:2)*DPR,0,Math.PI*2);ctx.fill();
+  ctx.arc(p.x,p.y,getPenWidth()/2,0,Math.PI*2);ctx.fill();
   cv.setPointerCapture&&cv.setPointerCapture(e.pointerId);}
 
 function move(e){if(!drawing)return;const p=pos(e);
-  ctx.strokeStyle=mode==='eraser'?'rgba(0,0,0,1)':penColor;ctx.lineWidth=(mode==='eraser'?20:3.5)*DPR;
+  ctx.strokeStyle=mode==='eraser'?'rgba(0,0,0,1)':penColor;
+  ctx.lineWidth=getPenWidth();
+  ctx.globalAlpha = (mode==='pen' && penType==='marker') ? 0.4 : 1.0;
   ctx.lineCap='round'; ctx.lineJoin='round';
   ctx.beginPath(); ctx.moveTo(lastX,lastY); ctx.lineTo(p.x, p.y); ctx.stroke();
   lastX=p.x;lastY=p.y;}
 
-function end(){drawing=false;ctx.globalCompositeOperation='source-over';}
+function end(){drawing=false;ctx.globalCompositeOperation='source-over';ctx.globalAlpha=1.0;}
 cv.addEventListener('pointerdown',e=>{e.preventDefault();start(e);});
 cv.addEventListener('pointermove',e=>{e.preventDefault();move(e);});
 cv.addEventListener('pointerup',end);cv.addEventListener('pointercancel',end);cv.addEventListener('pointerleave',end);
 
-/* ========= ツールUI ========= */
 const colorsEl=document.getElementById('colors');
 COLORS.forEach((c,i)=>{const b=document.createElement('button');b.className='sw'+(i===0?' on':'');b.style.background=c;
   b.onclick=()=>{penColor=c;mode='pen';document.querySelectorAll('.sw').forEach(s=>s.classList.remove('on'));b.classList.add('on');
@@ -621,32 +635,41 @@ eraserBtn.onclick=()=>{mode=mode==='eraser'?'pen':'eraser';eraserBtn.classList.t
 document.getElementById('undo').onclick=()=>{if(undoStack.length)ctx.putImageData(undoStack.pop(),0,0);};
 document.getElementById('clear').onclick=()=>{pushUndo();ctx.clearRect(0,0,cv.width,cv.height);};
 
+// ペンの種類ボタン設定
+function setPenType(type, btnId){
+  penType = type;
+  document.getElementById('penNormal').classList.remove('on');
+  document.getElementById('penBold').classList.remove('on');
+  document.getElementById('penMarker').classList.remove('on');
+  document.getElementById(btnId).classList.add('on');
+  mode='pen';
+  eraserBtn.classList.remove('on');
+  document.querySelectorAll('.stamp-btn').forEach(s=>s.classList.remove('on'));
+}
+document.getElementById('penNormal').onclick=function(){setPenType('normal','penNormal');};
+document.getElementById('penBold').onclick=function(){setPenType('bold','penBold');};
+document.getElementById('penMarker').onclick=function(){setPenType('marker','penMarker');};
+
 function selStamp(btn,st){const was=btn.classList.contains('on');document.querySelectorAll('.stamp-btn').forEach(x=>x.classList.remove('on'));
   if(was){mode='pen';}else{mode='stamp';currentStamp=st;btn.classList.add('on');document.querySelectorAll('.sw').forEach(x=>x.classList.remove('on'));eraserBtn.classList.remove('on');showToast('えがめんを タップして おいてね');}}
 
-/* Miiメーカーで作ったオリジナル顔やプリセット顔をスタンプ一覧に反映する関数 */
 function renderStamps(){
   const stampsEl = document.getElementById('stamps');
   stampsEl.innerHTML = '';
-  
-  // 自分・あいて・プリセットのアバターを重複しないように集める
   const miiSet = [profile.me.avatar, profile.you.avatar, 0, 1, 2, 5];
   const uniqueMiis = [];
   for(const id of miiSet){
     if(!uniqueMiis.includes(id)) uniqueMiis.push(id);
-    if(uniqueMiis.length >= 6) break; // スタンプパレットに表示するのは最大6つ
+    if(uniqueMiis.length >= 6) break;
   }
-  
   uniqueMiis.forEach(id => {
     preloadCustomMii(id);
     const b = document.createElement('button');
     b.className = 'stamp-btn mii';
     b.innerHTML = avatarSVG(id);
-    b.title = 'アバター顔スタンプ';
     b.onclick = () => selStamp(b, {type:'mii', val:id});
     stampsEl.appendChild(b);
   });
-  
   STAMPS.forEach(s => {
     const b = document.createElement('button');
     b.className = 'stamp-btn';
@@ -656,10 +679,27 @@ function renderStamps(){
   });
 }
 
-document.querySelectorAll('[data-bg]').forEach(b=>{b.onclick=()=>{bgType=b.dataset.bg;
-  document.querySelectorAll('[data-bg]').forEach(x=>x.classList.remove('on'));b.classList.add('on');drawTemplate();};});
+// 背景と写真の切り替え
+document.querySelectorAll('[data-bg]').forEach(b=>{b.onclick=()=>{
+  bgType=b.dataset.bg; currentBgPhoto=null;
+  document.querySelectorAll('[data-bg], #bgPhotoBtn').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on'); drawTemplate();
+};});
+document.getElementById('bgPhotoBtn').onclick = () => document.getElementById('bgPhotoInput').click();
+document.getElementById('bgPhotoInput').onchange = (e) => {
+  const f = e.target.files[0];
+  if(!f) return;
+  const url = URL.createObjectURL(f);
+  const im = new Image();
+  im.onload = () => {
+    currentBgPhoto = im;
+    document.querySelectorAll('[data-bg]').forEach(x=>x.classList.remove('on'));
+    document.getElementById('bgPhotoBtn').classList.add('on');
+    bgType='photo'; drawTemplate();
+  };
+  im.src = url;
+};
 
-/* ========= 作者タブ ========= */
 const tabMe=document.getElementById('tabMe'),tabYou=document.getElementById('tabYou');
 function renderTabs(){
   document.getElementById('miniMe').innerHTML=avatarSVG(profile.me.avatar);
@@ -683,23 +723,31 @@ async function kvSet(k,v,sh){if(_ws){try{return await _ws.set(k,v,sh);}catch(_){
 async function fetchRoom(){try{const r=await kvGet(roomStoreKey,true);if(r&&r.value)return JSON.parse(r.value);}catch(_){}return[];}
 async function saveRoom(arr){try{await kvSet(roomStoreKey,JSON.stringify(arr),true);}catch(e){console.warn(e);showToast('ほぞんできなかった…');}}
 
-/* ========= 表示 ========= */
 const img=document.getElementById('entryImg'),empty=document.getElementById('empty');
 const avatarEl=document.getElementById('avatar'),dateEl=document.getElementById('dateLabel'),pageEl=document.getElementById('pagenum');
 const prevBtn=document.getElementById('prev'),nextBtn=document.getElementById('next');
-function render(){
+
+// アニメーション再生付き描画
+function render(animateDirection = ''){
   if(entries.length===0){empty.hidden=false;img.hidden=true;avatarEl.hidden=dateEl.hidden=pageEl.hidden=true;
     prevBtn.classList.remove('show');nextBtn.classList.remove('show');return;}
   if(viewIdx>entries.length-1)viewIdx=entries.length-1;
   empty.hidden=true;img.hidden=false;const e=entries[viewIdx];
-  img.src=e.image;img.classList.remove('entry-img');void img.offsetWidth;img.classList.add('entry-img');
+  
+  // アニメーションの付け替え
+  img.classList.remove('slide-next', 'slide-prev');
+  void img.offsetWidth; // リフロー
+  if(animateDirection === 'next') img.classList.add('slide-next');
+  if(animateDirection === 'prev') img.classList.add('slide-prev');
+  
+  img.src=e.image;
   avatarEl.hidden=false;avatarEl.innerHTML=avatarSVG(e.avatarId!=null?e.avatarId:0)+'<div class="nm">'+(e.name||'')+'</div>';
   dateEl.hidden=false;{const sh=(e.dateLabel||'').replace(/^\d+\//,'');const mm=sh.match(/^(\S+)\s*(\(.*\))?$/);dateEl.innerHTML=(mm?mm[1]:sh)+'<br><small>'+(mm&&mm[2]?mm[2]:'')+'</small>';}
   pageEl.hidden=false;pageEl.textContent=(viewIdx+1);
   prevBtn.classList.toggle('show',viewIdx>0);nextBtn.classList.toggle('show',viewIdx<entries.length-1);
 }
-prevBtn.onclick=()=>{if(viewIdx>0){viewIdx--;render();}};
-nextBtn.onclick=()=>{if(viewIdx<entries.length-1){viewIdx++;render();}};
+prevBtn.onclick=()=>{if(viewIdx>0){viewIdx--;render('prev');}};
+nextBtn.onclick=()=>{if(viewIdx<entries.length-1){viewIdx++;render('next');}};
 
 function flattenURL(){const t=document.createElement('canvas');t.width=cv.width;t.height=cv.height;
   const x=t.getContext('2d');x.drawImage(bg,0,0);x.drawImage(cv,0,0);return t.toDataURL('image/png');}
@@ -711,7 +759,7 @@ document.getElementById('save').onclick=async()=>{
   const prof=author==='me'?profile.me:profile.you;
   const entry={name:prof.name,avatarId:prof.avatar,dateLabel:todayLabel(),image:flattenURL(),ts:Date.now()};
   if(FB_ON&&entriesRef){try{await _fb.push(entriesRef,entry);}catch(e){console.warn(e);showToast('そうしんできなかった…');return;}ctx.clearRect(0,0,cv.width,cv.height);undoStack.length=0;showToast('かけたよ！');}
-  else{const latest=await fetchRoom();latest.push(entry);entries=latest;viewIdx=entries.length-1;latestLen=entries.length;setBadge(0);render();await saveRoom(entries);ctx.clearRect(0,0,cv.width,cv.height);undoStack.length=0;showToast('かけたよ！');}
+  else{const latest=await fetchRoom();latest.push(entry);entries=latest;viewIdx=entries.length-1;latestLen=entries.length;setBadge(0);render('next');await saveRoom(entries);ctx.clearRect(0,0,cv.width,cv.height);undoStack.length=0;showToast('かけたよ！');}
 };
 
 function setBadge(n){badgeN=n;const b=document.getElementById('badge');b.textContent=n;b.classList.toggle('show',n>0);}
@@ -719,7 +767,7 @@ document.getElementById('refresh').onclick=async()=>{
   const before=entries.length;
   if(FB_ON&&entriesRef){try{const snap=await _fb.get(entriesRef);const val=snap.val()||{};entries=Object.keys(val).map(k=>val[k]).filter(Boolean).sort((a,b)=>((a.ts||0)-(b.ts||0)));}catch(_){}}
   else{entries=await fetchRoom();}
-  latestLen=entries.length;viewIdx=Math.max(0,entries.length-1);setBadge(0);render();
+  latestLen=entries.length;viewIdx=Math.max(0,entries.length-1);setBadge(0);render('next');
   showToast(entries.length>before?('あたらしい日記が '+(entries.length-before)+'けん！'):'さいしんだよ');
 };
 function setPresence(n,nm){const el=document.getElementById('presence');
@@ -765,9 +813,8 @@ document.getElementById('shareImg').onclick=async()=>{
   showToast('シェアにたいおうしてないので ほぞんしたよ');
 };
 
-/* ========= Miiメーカー（オリジナル顔システム） ========= */
 let pick={me:profile.me.avatar,you:profile.you.avatar};
-let customMii = [0,0,0,0]; // 髪, 目, 口, 肌の色
+let customMii = [0,0,0,0];
 const maxMii = [6, 6, 6, 6];
 
 window.changeMii = function(part, dir){
@@ -783,7 +830,6 @@ window.applyMaker = function(){
 
 function buildAvGrid(el,who){
   el.innerHTML='';
-  // プリセット追加
   for(let i=0;i<AV_COUNT;i++){
     const b=document.createElement('button');
     b.className='avopt'+(pick[who]===i?' on':'');
@@ -796,7 +842,6 @@ function buildAvGrid(el,who){
     el.appendChild(b);
   }
   
-  // カスタム枠追加
   const isCustom = typeof pick[who] === 'string' && pick[who].startsWith('c:');
   const customBtn = document.createElement('button');
   customBtn.className = 'avopt' + (isCustom ? ' on' : '');
@@ -831,7 +876,7 @@ document.getElementById('saveProfile').onclick=async()=>{
   try{await kvSet('nikki:profile',JSON.stringify(profile),false);}catch(_){}
   renderTabs();
   setAuthor(author);
-  renderStamps(); // ★スタンプ一覧に新しい顔を反映する
+  renderStamps();
   modal.classList.remove('show');
   showToast('ほぞんしたよ！');
 };
@@ -875,6 +920,7 @@ document.getElementById('leave').onclick=async()=>{
   if(FB_ON){fbDetach();}
   else{try{if(presKey){const r=await kvGet(presKey,true);let o=r&&r.value?JSON.parse(r.value):{};delete o[clientId];await kvSet(presKey,JSON.stringify(o),true);}}catch(_){}}
   presKey=null;roomStoreKey=null;entries=[];device.classList.add('hidden');lock.classList.remove('hidden');
+  try{await kvSet('nikki:lastword','',false);}catch(_){} 
   lockErr.textContent='';wordInput.value='';renderChips();wordInput.focus();};
 
 (async function init(){
@@ -889,9 +935,30 @@ document.getElementById('leave').onclick=async()=>{
   renderTabs();
   setAuthor('me');
   renderChips();
-  renderStamps(); // ★起動時にスタンプを生成
+  renderStamps();
   
-  try{const lw=await kvGet('nikki:lastword',false);if(lw&&lw.value){await enterRoom(lw.value);return;}}catch(_){}
+  try{
+    const lw=await kvGet('nikki:lastword',false);
+    if(lw&&lw.value){
+      const w = lw.value;
+      const {number} = hashRoom(w);
+      document.getElementById('resumeRoomNo').textContent = 'No.' + number;
+      const rm = document.getElementById('resumeModal');
+      rm.classList.add('show');
+      
+      document.getElementById('btnResume').onclick = async () => {
+        rm.classList.remove('show');
+        await enterRoom(w);
+      };
+      document.getElementById('btnGoTitle').onclick = async () => {
+        rm.classList.remove('show');
+        try { await kvSet('nikki:lastword', '', false); } catch(_) {}
+        wordInput.focus();
+      };
+      return;
+    }
+  }catch(_){}
+  
   wordInput.focus();
 })();
 window.addEventListener('resize',()=>{if(!device.classList.contains('hidden'))fitCanvas();});
