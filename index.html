@@ -310,22 +310,52 @@ async function initFirebase(){
   try{ const a=await import("https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js"); const d=await import("https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js"); db=d.getDatabase(a.initializeApp(firebaseConfig)); _fb=d; return true;
   }catch(e){return false;}
 }
-function offBar(){const el=document.getElementById('presence');if(el){el.className='presence';el.textContent='🔌 1人モード（共有オフ）';}}
+function setLockNote(){
+  const n=document.querySelector('.lock .note'); if(!n)return;
+  if(FB_ON){ n.innerHTML='※あいことばが、へやのカギになります'; }
+  else{ n.innerHTML='<b style="color:#eb5c5c">つうしんにつながっていません。<br>ネットをかくにんして、リロードしてね</b>'; }
+}
+/* バグ修正: 呼ばれているのに未定義だった関数を追加 */
+function setBadge(n){
+  badgeN=Math.max(0,n|0);
+  const el=document.getElementById('badge');
+  if(el){ el.textContent=badgeN; el.classList.toggle('show', badgeN>0); }
+}
+function setPresence(others,nm){
+  const el=document.getElementById('presence');
+  if(!el)return;
+  if(others>0){ el.className='presence on'; el.textContent='🟢 '+(nm||'あいて')+' がへやにいます'; }
+  else{ el.className='presence'; el.textContent='⚪ あいてを待っています...'; }
+}
 function updatePresenceObj(obj){const now=Date.now();let others=0,nm='';for(const k in (obj||{})){if(k!==clientId && now-(obj[k].ts||0)<60000){others++;nm=obj[k].name||'あいて';}}setPresence(others,nm);}
+let _unsub=[], _presInterval=null;
 function fbAttach(key){
+  fbDetach(); // 念のため二重登録を防ぐ
   entriesRef=_fb.ref(db,'rooms/'+key+'/entries'); presRef=_fb.ref(db,'rooms/'+key+'/presence'); myPresRef=_fb.ref(db,'rooms/'+key+'/presence/'+clientId); _firstLoad=true;
-  _fb.onValue(entriesRef, snap=>{
+  const u1=_fb.onValue(entriesRef, snap=>{
     const val=snap.val()||{}; const arr=Object.keys(val).map(k=>val[k]).filter(Boolean).sort((a,b)=>((a.ts||0)-(b.ts||0)));
     const grew=arr.length-entries.length; const wasLast=(viewIdx>=entries.length-1); entries=arr;
     if(_firstLoad){viewIdx=Math.max(0,entries.length-1);setBadge(0);_firstLoad=false;renderTop();}
-    else if(grew>0){if(wasLast){viewIdx=entries.length-1;setBadge(0);renderTop();showToast('あたらしい日記が とどいたよ！');}else{setBadge((badgeN||0)+grew);renderTop();}}
+    else if(grew>0){
+      if(wasLast){
+        viewIdx=entries.length-1;setBadge(0);renderTop();
+        const last=entries[entries.length-1];
+        if(!last||last.cid!==clientId) showToast('あたらしい日記が とどいたよ！'); // 自分の投稿では出さない
+      }else{setBadge((badgeN||0)+grew);renderTop();}
+    }
     else{if(viewIdx>entries.length-1)viewIdx=Math.max(0,entries.length-1);renderTop();}
   });
   try{_fb.set(myPresRef,{name:(profile.me.name||'じぶん'),ts:Date.now()}); _fb.onDisconnect(myPresRef).remove();}catch(_){}
-  _fb.onValue(presRef, snap=>updatePresenceObj(snap.val()||{}));
-  setInterval(()=>{if(myPresRef){try{_fb.set(myPresRef,{name:(profile.me.name||'じぶん'),ts:Date.now()});}catch(_){}}},20000);
+  const u2=_fb.onValue(presRef, snap=>updatePresenceObj(snap.val()||{}));
+  _unsub=[u1,u2];
+  _presInterval=setInterval(()=>{if(myPresRef){try{_fb.set(myPresRef,{name:(profile.me.name||'じぶん'),ts:Date.now()});}catch(_){}}},20000);
 }
-function fbDetach(){ entriesRef=presRef=myPresRef=null; }
+function fbDetach(){
+  _unsub.forEach(u=>{try{u&&u();}catch(_){}}); _unsub=[];
+  if(_presInterval){clearInterval(_presInterval);_presInterval=null;}
+  try{if(myPresRef)_fb.remove(myPresRef);}catch(_){}
+  entriesRef=presRef=myPresRef=null;
+}
 
 function avatarSVG(id){
   if(typeof id==='string'&&id.startsWith('c:')){
@@ -373,6 +403,7 @@ const DPR=Math.min(window.devicePixelRatio||1,2.5);
 function fitCanvas(){
   const r=cv.getBoundingClientRect(); if(r.width===0)return;
   const w=Math.round(r.width*DPR), h=Math.round(r.height*DPR);
+  if(cv.width===w && cv.height===h) return; // サイズ変化なし→キャンバスを消さない
   cv.width=w; cv.height=h; bg.width=w; bg.height=h;
   drawTemplate();
 }
@@ -454,7 +485,7 @@ document.getElementById('bgPhotoInput').onchange=(e)=>{const f=e.target.files[0]
 const tabMe=document.getElementById('tabMe'),tabYou=document.getElementById('tabYou');
 function renderTabs(){ document.getElementById('miniMe').innerHTML=avatarSVG(profile.me.avatar); document.getElementById('miniYou').innerHTML=avatarSVG(profile.you.avatar); }
 function setAuthor(a){author=a;tabMe.classList.toggle('on',a==='me');tabYou.classList.toggle('on',a==='you');
-  const nm=a==='me'?profile.me.name:profile.you.name;document.getElementById('hint').textContent=(nm||'')+'の日記';}
+  const nm=a==='me'?profile.me.name:profile.you.name;const h=document.getElementById('hint');if(h)h.textContent=(nm||'')+'の日記';}
 tabMe.onclick=()=>setAuthor('me'); tabYou.onclick=()=>setAuthor('you');
 
 function showToast(t){const el=document.getElementById('toast'); el.textContent=t; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),1600);}
@@ -490,7 +521,7 @@ function renderTop(anim=''){
   if(anim) img.classList.add(anim);
   img.src=pages[viewSubIdx];
 
-  avatarEl.innerHTML=avatarSVG(e.avatarId!=null?e.avatarId:0)+'<div class="nm">'+(e.name||'')+'</div>';
+  avatarEl.innerHTML=avatarSVG(e.avatarId!=null?e.avatarId:0)+'<div class="nm">'+(e.name||'').replace(/[&<>"]/g,'')+'</div>';
   dateEl.innerHTML=(e.dateLabel||'').replace(/^\d+\//,'');
   pageEl.textContent=(viewIdx+1);
   prevBtn.classList.toggle('show',viewIdx>0); nextBtn.classList.toggle('show',viewIdx<entries.length-1);
@@ -544,24 +575,20 @@ document.getElementById('save').onclick=async()=>{
     loadDraft(currentDraftIdx);
 
     const prof=author==='me'?profile.me:profile.you;
-    const entry={name:prof.name,avatarId:prof.avatar,dateLabel:todayLabel(),image:pagesData[0],pages:pagesData,ts:Date.now()};
-    
-    let success = false;
-    if(FB_ON&&entriesRef){
-      // ネットワーク切断時のフリーズ防止
-      await Promise.race([
-        _fb.push(entriesRef,entry),
-        new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')), 8000))
-      ]);
-      success = true;
-    } else {
-      const r=await kvGet(roomStoreKey,true);
-      let arr=r&&r.value?JSON.parse(r.value):[]; 
-      arr.push(entry); entries=arr; viewIdx=arr.length-1; viewSubIdx=0; 
-      await kvSet(roomStoreKey,JSON.stringify(arr),true); 
-      success = true;
-      setBadge(0); renderTop('slide-next');
+    const entry={name:prof.name,avatarId:prof.avatar,cid:clientId,dateLabel:todayLabel(),image:pagesData[0],pages:pagesData,ts:Date.now()};
+
+    // 共有は必須。つながっていなければ送信しない（描いた絵は消さない）
+    if(!(FB_ON&&entriesRef)){
+      btn.style.opacity='1'; btn.style.pointerEvents='auto';
+      showToast('つうしんにつながっていません');
+      return;
     }
+    // ネットワーク切断時のフリーズ防止（8秒でタイムアウト）
+    await Promise.race([
+      _fb.push(entriesRef,entry),
+      new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')), 8000))
+    ]);
+    const success = true;
 
     btn.style.opacity = '1';
     btn.style.pointerEvents = 'auto';
@@ -621,26 +648,30 @@ function renderChips(){
   }); 
 }
 
-async function enterRoom(w){ 
-  w=w.trim(); if(w.length<2){document.getElementById('lockErr').textContent='2もじ いじょうで いれてね';return;} 
+async function enterRoom(w){
+  w=w.trim(); if(w.length<2){document.getElementById('lockErr').textContent='2もじ いじょうで いれてね';return;}
+  // 共有は必須。つながっていなければ再接続を試み、ダメなら入室させない
+  if(!FB_ON){ FB_ON=await initFirebase(); setLockNote(); }
+  if(!FB_ON){ document.getElementById('lockErr').textContent='つうしんにつながりません。ネットをかくにんしてリロードしてね'; return; }
+  document.getElementById('lockErr').textContent='';
   const {key,number}=hashRoom(w); roomStoreKey=key; presKey=key+':p'; currentWord=w;
-  document.getElementById('roomNo').textContent='No.'+number; 
-  document.getElementById('lock').classList.add('hidden'); 
-  document.getElementById('device').classList.remove('hidden'); 
-  requestAnimationFrame(()=>{fitCanvas();loadDraft(0);}); 
-  if(FB_ON){fbDetach();entries=[];renderTop();fbAttach(key);}
-  else{const r=await kvGet(roomStoreKey,true);entries=r&&r.value?JSON.parse(r.value):[];viewIdx=Math.max(0,entries.length-1);viewSubIdx=0;setBadge(0);renderTop();offBar();} 
-  await addRecent(w,number); 
-  try{await kvSet('nikki:lastword',w,false);}catch(_){} 
+  document.getElementById('roomNo').textContent='No.'+number;
+  document.getElementById('lock').classList.add('hidden');
+  document.getElementById('device').classList.remove('hidden');
+  requestAnimationFrame(()=>{fitCanvas();loadDraft(0);});
+  fbDetach(); entries=[]; viewIdx=0; viewSubIdx=0; setBadge(0); renderTop(); fbAttach(key);
+  await addRecent(w,number);
+  try{await kvSet('nikki:lastword',w,false);}catch(_){}
 }
-document.getElementById('enterBtn').onclick=()=>enterRoom(document.getElementById('word').value); 
+document.getElementById('refresh').onclick=()=>{ viewIdx=Math.max(0,entries.length-1); viewSubIdx=0; setBadge(0); renderTop('slide-next'); };
+document.getElementById('enterBtn').onclick=()=>enterRoom(document.getElementById('word').value);
 document.getElementById('word').onkeydown=e=>{if(e.key==='Enter')enterRoom(e.target.value);};
-document.getElementById('leave').onclick=async()=>{ 
-  if(FB_ON)fbDetach(); 
-  presKey=roomStoreKey=null; entries=[]; 
-  document.getElementById('device').classList.add('hidden'); 
-  document.getElementById('lock').classList.remove('hidden'); 
-  try{await kvSet('nikki:lastword','',false);}catch(_){} 
+document.getElementById('leave').onclick=async()=>{
+  fbDetach();
+  presKey=roomStoreKey=null; entries=[]; viewIdx=0; viewSubIdx=0; setBadge(0);
+  document.getElementById('device').classList.add('hidden');
+  document.getElementById('lock').classList.remove('hidden');
+  try{await kvSet('nikki:lastword','',false);}catch(_){}
   renderChips(); document.getElementById('word').focus();
 };
 
@@ -685,7 +716,9 @@ document.getElementById('shareImg').onclick=async()=>{
 
 (async function init(){
   for(let i=0;i<AV_COUNT;i++) preloadCustomMii(i);
-  FB_ON=await initFirebase(); if(!FB_ON){const n=document.querySelector('.lock .note');if(n)n.innerHTML='※ あいことばが へやのカギ。ひみつにしてね<br><b style="color:#eb5c5c">いまは共有オフ（Firebase未設定）</b>';}
+  FB_ON=await initFirebase();
+  for(let tryN=0; !FB_ON && tryN<2; tryN++){ await new Promise(r=>setTimeout(r,1200)); FB_ON=await initFirebase(); }
+  setLockNote();
   try{const c=await kvGet('nikki:clientid',false);if(c&&c.value)clientId=c.value;else{clientId='c'+Math.random().toString(36).slice(2);await kvSet('nikki:clientid',clientId,false);}}catch(_){clientId='c'+Math.random().toString(36).slice(2);}
   try{const p=await kvGet('nikki:profile',false);if(p&&p.value)profile=JSON.parse(p.value);}catch(_){}
   try{const r=await kvGet('nikki:recent',false);if(r&&r.value)recent=JSON.parse(r.value); if(!Array.isArray(recent))recent=[];}catch(_){recent=[];}
