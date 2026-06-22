@@ -79,7 +79,11 @@
   .avatar { position: absolute; left: 6px; bottom: 6px; text-align: center; z-index: 4; }
   .avatar svg { width: 48px; height: 48px; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2)); }
   .avatar .nm { font-size: 10px; font-weight: 800; color: var(--text-main); background: rgba(255,255,255,0.85); border-radius: 4px; padding: 2px 4px; margin-top: -4px; display: inline-block; }
+  
+  /* ページ番号（バグ修正: .hiddenを優先させる） */
   .pagenum { position: absolute; right: 8px; bottom: 8px; width: 28px; height: 28px; border-radius: 50%; background: var(--n-green); color: #fff; font-weight: 800; font-size: 12px; display: flex; align-items: center; justify-content: center; box-shadow: 0 3px 0 var(--n-green-dark); z-index: 4; }
+  .pagenum.hidden { display: none !important; }
+
   .nav { position: absolute; top: 50%; transform: translateY(-50%); width: 32px; height: 44px; background: rgba(0,0,0,0.2); border-radius: 6px; color: #fff; font-size: 20px; font-weight: 800; display: none; align-items: center; justify-content: center; z-index: 4; }
   .nav.show { display: flex; }
   .nav:hover { background: var(--n-blue); }
@@ -108,7 +112,7 @@
   .canvas-wrap { position: relative; background: #fdfdfd; border-radius: 4px; overflow: hidden; aspect-ratio: 5/3; border: 2px solid #555; width: 100%; }
   canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
 
-  /* 横スクロールツールバー（スクロールバーを表示して分かりやすく改善） */
+  /* 横スクロールツールバー */
   .tool-row { 
     display: flex; gap: 6px; align-items: center; 
     overflow-x: auto; padding-bottom: 6px; margin-bottom: 2px;
@@ -161,6 +165,7 @@
 </head>
 <body>
 
+  <!-- ロック画面 -->
   <div class="lock" id="lock">
     <div class="keyart">✏️</div>
     <h1>イラストこうかん日記</h1>
@@ -172,6 +177,7 @@
     <div class="recent hidden" id="recentBox"><div class="lbl">さいきん入ったへや</div><div class="chips" id="chips"></div></div>
   </div>
 
+  <!-- 本体 -->
   <div class="device hidden" id="device">
     <p class="brand">イラストこうかん日記</p>
 
@@ -186,23 +192,26 @@
 
     <div class="presence" id="presence">⚪ あいてを待っています...</div>
 
+    <!-- 上画面 -->
     <div class="screen">
       <div class="top-inner" id="topInner">
         <img id="entryImg" class="entry-img" alt="日記" hidden />
         <div id="empty" class="empty">まだ日記がありません。<br>下のがめんに描いて<br>「日記を書く」をおそう！</div>
         <div id="avatar" class="avatar" hidden></div>
         <div id="dateLabel" class="date" hidden></div>
-        <div id="pagenum" class="pagenum" hidden>1</div>
+        <div id="pagenum" class="pagenum hidden">1</div>
         <button class="nav prev" id="prev">&lsaquo;</button>
         <button class="nav next" id="next">&rsaquo;</button>
       </div>
     </div>
 
+    <!-- シェア -->
     <div class="shareRow">
       <button id="saveImg">この日記を保存</button>
       <button id="shareImg">シェアする</button>
     </div>
 
+    <!-- 下画面 -->
     <div class="screen">
       <div class="bot-inner">
         <div class="who">
@@ -223,13 +232,16 @@
           <canvas id="cv"></canvas>
         </div>
 
+        <!-- ツールバー1行目 (ペン・色) -->
         <div class="tool-row" id="colors">
           <button class="tool-btn on" id="penNormal">ペン</button>
           <button class="tool-btn" id="penBold">太</button>
           <button class="tool-btn" id="penMarker">透</button>
           <div class="vline"></div>
-          </div>
+          <!-- JavaScriptで色が追加されます -->
+        </div>
 
+        <!-- ツールバー2行目 (背景・スタンプ・機能) -->
         <div class="tool-row">
           <button class="tool-btn" id="eraser">消</button>
           <button class="tool-btn" id="undo">戻す</button>
@@ -252,6 +264,7 @@
     </div>
   </div>
 
+  <!-- 設定モーダル等 -->
   <div class="modal" id="modal">
     <div class="sheet">
       <h2>なまえと アバター</h2>
@@ -290,7 +303,6 @@ const firebaseConfig={
 };
 let db=null,FB_ON=false,_fb={};
 let entriesRef=null,presRef=null,myPresRef=null,clientId='',presKey=null,_firstLoad=true;
-// ★修正：変数の不足によるクラッシュを防ぐため確実に定義
 let currentWord='', author='me', entries=[], viewIdx=0, roomStoreKey=null;
 
 async function initFirebase(){
@@ -333,6 +345,9 @@ const COLORS=["#3a3540","#eb5c5c","#5cb8e6","#8cc63f","#f2c94c","#ffffff"];
 const STAMPS=["⭐","❤️","🌸","😊","🎀","🐱","🍀","✨"];
 let mode='pen', penColor=COLORS[0], penType='normal', currentStamp={type:'emoji',val:STAMPS[0]};
 const miiCanvas=[];
+
+function avatarDataURI(id,px){return 'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(avatarSVG(id).replace('<svg ',`<svg width="${px}" height="${px}" `));}
+
 function preloadCustomMii(id){
   if(miiCanvas[id]) return; const im=new Image();
   im.onload=()=>{const c=document.createElement('canvas');c.width=96;c.height=96;c.getContext('2d').drawImage(im,0,0,96,96);miiCanvas[id]=c;};
@@ -340,7 +355,7 @@ function preloadCustomMii(id){
 }
 
 let bgType='plain', latestLen=0, badgeN=0;
-let currentBgPhoto=null; // 背景写真用
+let currentBgPhoto=null; 
 let profile={me:{name:'じぶん',avatar:0},you:{name:'あいて',avatar:1}}, recent=[];
 
 /* ==== 複数ページ（ドラフト）管理 ==== */
@@ -438,7 +453,8 @@ document.getElementById('bgPhotoInput').onchange=(e)=>{const f=e.target.files[0]
 
 const tabMe=document.getElementById('tabMe'),tabYou=document.getElementById('tabYou');
 function renderTabs(){ document.getElementById('miniMe').innerHTML=avatarSVG(profile.me.avatar); document.getElementById('miniYou').innerHTML=avatarSVG(profile.you.avatar); }
-function setAuthor(a){author=a;tabMe.classList.toggle('on',a==='me');tabYou.classList.toggle('on',a==='you');}
+function setAuthor(a){author=a;tabMe.classList.toggle('on',a==='me');tabYou.classList.toggle('on',a==='you');
+  const nm=a==='me'?profile.me.name:profile.you.name;document.getElementById('hint').textContent=(nm||'')+'の日記';}
 tabMe.onclick=()=>setAuthor('me'); tabYou.onclick=()=>setAuthor('you');
 
 function showToast(t){const el=document.getElementById('toast'); el.textContent=t; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),1600);}
@@ -453,10 +469,21 @@ const img=document.getElementById('entryImg'), empty=document.getElementById('em
 
 function renderTop(anim=''){
   if(playTimer){clearInterval(playTimer); playTimer=null;}
-  if(entries.length===0){empty.hidden=false;img.hidden=avatarEl.hidden=dateEl.hidden=pageEl.hidden=true;prevBtn.classList.remove('show');nextBtn.classList.remove('show');return;}
-  empty.hidden=true; img.hidden=avatarEl.hidden=dateEl.hidden=pageEl.hidden=false;
+  
+  if(!entries || entries.length===0){
+    empty.hidden=false; img.hidden=true; avatarEl.hidden=true; dateEl.hidden=true;
+    pageEl.classList.add('hidden'); // HTMLのhiddenではなくクラスで確実に消す
+    prevBtn.classList.remove('show'); nextBtn.classList.remove('show');
+    return;
+  }
+  
+  empty.hidden=true; img.hidden=false; avatarEl.hidden=false; dateEl.hidden=false;
+  pageEl.classList.remove('hidden');
+
   const e=entries[viewIdx];
-  const pages = e.pages || [e.image];
+  if(!e) return;
+  const pages = e.pages || (e.image ? [e.image] : []);
+  if(pages.length === 0) return;
   if(viewSubIdx >= pages.length) viewSubIdx = 0;
 
   img.classList.remove('slide-next','slide-prev'); void img.offsetWidth;
@@ -464,7 +491,7 @@ function renderTop(anim=''){
   img.src=pages[viewSubIdx];
 
   avatarEl.innerHTML=avatarSVG(e.avatarId!=null?e.avatarId:0)+'<div class="nm">'+(e.name||'')+'</div>';
-  dateEl.innerHTML=e.dateLabel.replace(/^\d+\//,'');
+  dateEl.innerHTML=(e.dateLabel||'').replace(/^\d+\//,'');
   pageEl.textContent=(viewIdx+1);
   prevBtn.classList.toggle('show',viewIdx>0); nextBtn.classList.toggle('show',viewIdx<entries.length-1);
 
@@ -479,32 +506,78 @@ function renderTop(anim=''){
 prevBtn.onclick=()=>{if(viewIdx>0){viewIdx--; viewSubIdx=0; renderTop('slide-prev');}};
 nextBtn.onclick=()=>{if(viewIdx<entries.length-1){viewIdx++; viewSubIdx=0; renderTop('slide-next');}};
 
-function flattenURL(){const t=document.createElement('canvas');t.width=cv.width;t.height=cv.height;const x=t.getContext('2d');x.drawImage(bg,0,0);x.drawImage(cv,0,0);return t.toDataURL('image/jpeg',0.85);}
+// ★修正：容量・解像度を安全なサイズ（800x480）に固定して書き出す
+function flattenURL(){
+  const t=document.createElement('canvas');
+  t.width = 800; t.height = 480;
+  const x=t.getContext('2d');
+  x.fillStyle = '#fdfdfd';
+  x.fillRect(0, 0, t.width, t.height);
+  x.drawImage(bg, 0, 0, t.width, t.height);
+  x.drawImage(cv, 0, 0, t.width, t.height);
+  return t.toDataURL('image/jpeg', 0.65);
+}
 
+// ★修正：送信エラー時はキャンバスを消さずにボタンを復活させる
 document.getElementById('save').onclick=async()=>{
-  saveDraft();
-  let maxIdx = -1;
-  for(let i=3; i>=0; i--){
-    if(draftPhotos[i] || draftBgs[i]!=='plain') maxIdx = Math.max(maxIdx, i);
-    if(drafts[i]){ const d=drafts[i].data; for(let j=3;j<d.length;j+=40){ if(d[j]>0){maxIdx=Math.max(maxIdx,i); break;} } }
-  }
-  if(maxIdx === -1){showToast('なにか かいてね');return;}
+  try {
+    saveDraft();
+    let maxIdx = -1;
+    for(let i=3; i>=0; i--){
+      if(draftPhotos[i] || draftBgs[i]!=='plain') maxIdx = Math.max(maxIdx, i);
+      if(drafts[i]){ const d=drafts[i].data; for(let j=3;j<d.length;j+=40){ if(d[j]>0){maxIdx=Math.max(maxIdx,i); break;} } }
+    }
+    if(maxIdx === -1){showToast('なにか かいてね');return;}
 
-  const pagesData = [];
-  for(let i=0; i<=maxIdx; i++){
-    bgType=draftBgs[i]||'plain'; currentBgPhoto=draftPhotos[i]; drawTemplate();
-    ctx.clearRect(0,0,cv.width,cv.height); if(drafts[i]) ctx.putImageData(drafts[i],0,0);
-    pagesData.push(flattenURL());
-  }
-  
-  drafts=[null,null,null,null]; draftBgs=['plain','plain','plain','plain']; draftPhotos=[null,null,null,null]; undoStacks=[[],[],[],[]];
-  loadDraft(0);
+    const btn = document.getElementById('save');
+    btn.style.opacity = '0.6';
+    btn.style.pointerEvents = 'none';
 
-  const prof=author==='me'?profile.me:profile.you;
-  const entry={name:prof.name,avatarId:prof.avatar,dateLabel:todayLabel(),pages:pagesData,ts:Date.now()};
-  
-  if(FB_ON&&entriesRef){try{await _fb.push(entriesRef,entry);showToast('かけたよ！');}catch(e){showToast('エラー');}}
-  else{const r=await kvGet(roomStoreKey,true);let arr=r&&r.value?JSON.parse(r.value):[]; arr.push(entry); entries=arr; viewIdx=arr.length-1; viewSubIdx=0; setBadge(0); renderTop('slide-next'); await kvSet(roomStoreKey,JSON.stringify(arr),true); showToast('かけたよ！');}
+    const pagesData = [];
+    for(let i=0; i<=maxIdx; i++){
+      bgType=draftBgs[i]||'plain'; currentBgPhoto=draftPhotos[i]; drawTemplate();
+      ctx.clearRect(0,0,cv.width,cv.height); if(drafts[i]) ctx.putImageData(drafts[i],0,0);
+      pagesData.push(flattenURL());
+    }
+    
+    // UIを元に戻す
+    loadDraft(currentDraftIdx);
+
+    const prof=author==='me'?profile.me:profile.you;
+    const entry={name:prof.name,avatarId:prof.avatar,dateLabel:todayLabel(),image:pagesData[0],pages:pagesData,ts:Date.now()};
+    
+    let success = false;
+    if(FB_ON&&entriesRef){
+      // ネットワーク切断時のフリーズ防止
+      await Promise.race([
+        _fb.push(entriesRef,entry),
+        new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')), 8000))
+      ]);
+      success = true;
+    } else {
+      const r=await kvGet(roomStoreKey,true);
+      let arr=r&&r.value?JSON.parse(r.value):[]; 
+      arr.push(entry); entries=arr; viewIdx=arr.length-1; viewSubIdx=0; 
+      await kvSet(roomStoreKey,JSON.stringify(arr),true); 
+      success = true;
+      setBadge(0); renderTop('slide-next');
+    }
+
+    btn.style.opacity = '1';
+    btn.style.pointerEvents = 'auto';
+
+    // 送信が成功した時のみキャンバスを真っ白にする
+    if(success){
+      drafts=[null,null,null,null]; draftBgs=['plain','plain','plain','plain']; draftPhotos=[null,null,null,null]; undoStacks=[[],[],[],[]];
+      loadDraft(0);
+      showToast('かけたよ！');
+    }
+  } catch(err) {
+    console.error(err);
+    document.getElementById('save').style.opacity = '1';
+    document.getElementById('save').style.pointerEvents = 'auto';
+    showToast('エラーがおきました');
+  }
 };
 
 /* ===== Miiメーカー・設定 ===== */
@@ -569,6 +642,45 @@ document.getElementById('leave').onclick=async()=>{
   document.getElementById('lock').classList.remove('hidden'); 
   try{await kvSet('nikki:lastword','',false);}catch(_){} 
   renderChips(); document.getElementById('word').focus();
+};
+
+function todayLabel(){const d=new Date();const w=['日','月','火','水','木','金','土'][d.getDay()];
+  return d.getFullYear()+'/'+(d.getMonth()+1)+'/'+d.getDate()+' ('+w+')';}
+
+function loadImg(src){return new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=src;});}
+async function composeCard(e){
+  const W=900,H=620,c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');
+  const g=x.createLinearGradient(0,0,0,H);g.addColorStop(0,'#f9f7fd');g.addColorStop(1,'#f0ecf8');x.fillStyle=g;x.fillRect(0,0,W,H);
+  x.strokeStyle='#dde07a';x.lineWidth=16;x.strokeRect(42,42,W-84,H-160);
+  x.strokeStyle='#bcc04a';x.lineWidth=8;x.strokeRect(42,42,W-84,H-160);
+  
+  const imgSrc = e.image || (e.pages && e.pages[0]);
+  if(!imgSrc) return null;
+  const im=await loadImg(imgSrc);
+  
+  const mw=W-220,mh=H-310,r=Math.min(mw/im.width,mh/im.height);
+  const dw=im.width*r,dh=im.height*r;x.drawImage(im,(W-dw)/2,75,dw,dh);
+  try{const av=await loadImg(avatarDataURI(e.avatarId!=null?e.avatarId:0,180));x.drawImage(av,52,H-152,90,90);}catch(_){}
+  x.textAlign='left';x.fillStyle='#6f6880';x.font='700 32px "M PLUS Rounded 1c",sans-serif';x.fillText(e.name||'',150,H-92);
+  x.textAlign='center';x.fillStyle='#8a7e9c';x.font='700 30px sans-serif';x.fillText(e.dateLabel,W/2,H-46);
+  x.textAlign='right';x.fillStyle='#e8506f';x.font='800 28px "M PLUS Rounded 1c",sans-serif';x.fillText('こうかん日記',W-55,H-92);
+  return c.toDataURL('image/png');
+}
+document.getElementById('saveImg').onclick=async()=>{
+  if(!entries.length){showToast('まだ日記がないよ');return;}
+  const url=await composeCard(entries[viewIdx]);
+  if(!url) return;
+  const a=document.createElement('a');a.href=url;a.download='koukan_nikki.png';
+  document.body.appendChild(a);a.click();a.remove();showToast('ほぞんしたよ！');
+};
+document.getElementById('shareImg').onclick=async()=>{
+  if(!entries.length){showToast('まだ日記がないよ');return;}
+  const url=await composeCard(entries[viewIdx]);
+  if(!url) return;
+  try{const blob=await(await fetch(url)).blob();const file=new File([blob],'koukan_nikki.png',{type:'image/png'});
+    if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],text:'こうかん日記'});return;}}catch(_){}
+  const a=document.createElement('a');a.href=url;a.download='koukan_nikki.png';document.body.appendChild(a);a.click();a.remove();
+  showToast('シェアにたいおうしてないので ほぞんしたよ');
 };
 
 (async function init(){
