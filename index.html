@@ -172,12 +172,22 @@
   .caption:empty { display: none; }
 
   /* リアクション */
-  .reactRow { display: flex; align-items: center; gap: 8px; margin: 0 0 12px; flex-wrap: wrap; }
-  .reactDisplay { flex: 1; min-width: 120px; min-height: 30px; display: flex; align-items: center; gap: 4px; font-size: 18px; background: #f0ecf0; border-radius: 8px; padding: 4px 10px; }
-  .reactDisplay .none { font-size: 11px; color: #aaa; font-weight: 800; }
-  .reactBtns { display: flex; gap: 4px; }
-  .reactBtns button { font-size: 18px; padding: 5px 7px; border-radius: 8px; background: #fff; border: 2px solid #ddd; box-shadow: 0 2px 0 #ddd; line-height: 1; }
-  .reactBtns button.on { border-color: var(--n-red); background: #ffe3ea; box-shadow: 0 2px 0 var(--n-red-dark); }
+  .reactRow { display: flex; flex-direction: column; gap: 8px; margin: 0 0 12px; }
+  .reactDisplay { width: 100%; min-height: 40px; display: flex; align-items: center; flex-wrap: wrap; gap: 7px; background: #f3eef4; border-radius: 10px; padding: 6px 10px; box-shadow: inset 0 2px 4px rgba(0,0,0,.05); }
+  .reactDisplay .none { font-size: 11px; color: #b3a9b8; font-weight: 800; }
+  .rx { display: inline-flex; align-items: flex-end; gap: 1px; filter: drop-shadow(0 2px 1px rgba(0,0,0,.18)); }
+  .rx svg { width: 27px; height: 27px; display: block; }
+  .rx .rx-emoji { font-size: 22px; line-height: 1; }
+  .rx-n { font-size: 11px; font-weight: 800; color: #8a7e92; margin-left: 1px; }
+  .reactBtns { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: thin; }
+  .reactBtns::-webkit-scrollbar { height: 5px; }
+  .reactBtns::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+  .reactBtns button { flex: 0 0 auto; width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; padding: 4px; border-radius: 11px; background: #fff; border: 2px solid #e2dce4; box-shadow: 0 2px 0 #d8d0da; line-height: 1; }
+  .reactBtns button svg { width: 28px; height: 28px; display: block; }
+  .reactBtns button .rx-emoji { font-size: 21px; }
+  .reactBtns button.on { border-color: var(--n-red); background: #ffe7ee; box-shadow: 0 2px 0 var(--n-red-dark); }
+  .reactBtns button.pop { animation: rxpop .32s ease; }
+  @keyframes rxpop { 0% { transform: scale(1); } 40% { transform: scale(1.35) rotate(-6deg); } 100% { transform: scale(1); } }
 
   /* コメント入力 */
   .comment-field { display: flex; align-items: center; gap: 6px; background: #222; border-radius: 6px; padding: 6px 8px; margin-top: 2px; }
@@ -273,13 +283,7 @@
     <!-- リアクション -->
     <div class="reactRow" id="reactRow">
       <div class="reactDisplay" id="reactDisplay"></div>
-      <div class="reactBtns" id="reactBtns">
-        <button data-react="❤️">❤️</button>
-        <button data-react="😆">😆</button>
-        <button data-react="✨">✨</button>
-        <button data-react="👍">👍</button>
-        <button data-react="🎉">🎉</button>
-      </div>
+      <div class="reactBtns" id="reactBtns"></div>
     </div>
 
     <!-- シェア -->
@@ -469,6 +473,36 @@ const AV_COUNT=6;
 
 const COLORS=["#3a3540","#9b9b9b","#ffffff","#eb5c5c","#ff8a4c","#f2c94c","#fff27a","#8cc63f","#2f9a52","#5cb8e6","#3f7fe0","#8b5cf6","#e85aa0","#ffc1cc","#a9744f","#000000"];
 const STAMPS=["⭐","❤️","🌸","😊","🎀","🐱","🍀","✨"];
+
+/* ==== リアクション用 手描きイラスト（SVG）==== */
+const ILLUS={
+  heart:'<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><path d="M20 34C9 26 5 18 8.5 13c2.4-3.4 7.6-3.2 11.5 1.3 3.9-4.5 9.1-4.7 11.5-1.3C35 18 31 26 20 34Z" fill="#ff7d9d" stroke="#c0496a" stroke-width="2.2" stroke-linejoin="round"/><path d="M12.5 16c-1.4 1.4-1.6 3.6-.8 5.4" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity=".7"/></svg>',
+  star:'<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><path d="M20 4l4.6 9.4 10.4 1.5-7.5 7.3 1.8 10.3L20 29l-9.3 4.9 1.8-10.3L5 14.9l10.4-1.5z" fill="#ffd23f" stroke="#dd9b00" stroke-width="2.2" stroke-linejoin="round"/></svg>',
+  flower:'<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><g stroke="#d76aa0" stroke-width="2" fill="#ff9ec7"><circle cx="20" cy="9" r="6"/><circle cx="31" cy="17" r="6"/><circle cx="27" cy="30" r="6"/><circle cx="13" cy="30" r="6"/><circle cx="9" cy="17" r="6"/></g><circle cx="20" cy="20" r="6.5" fill="#ffe06b" stroke="#e7b62e" stroke-width="2"/></svg>',
+  smile:'<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="15.5" fill="#ffd83f" stroke="#e0a800" stroke-width="2.4"/><circle cx="14.5" cy="17" r="2.1" fill="#5a4630"/><circle cx="25.5" cy="17" r="2.1" fill="#5a4630"/><path d="M13 24c2.6 3.4 11.4 3.4 14 0" fill="none" stroke="#5a4630" stroke-width="2.4" stroke-linecap="round"/><circle cx="11" cy="23" r="2.3" fill="#ffb0a8" opacity=".7"/><circle cx="29" cy="23" r="2.3" fill="#ffb0a8" opacity=".7"/></svg>',
+  good:'<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><path d="M14 18l5-9c2.5-.4 4 1 3.5 3.5L21 18h8.5c2 0 3.2 1.8 2.6 3.6l-3 9c-.5 1.5-1.9 2.4-3.4 2.4H14z" fill="#ffd9b0" stroke="#c98b54" stroke-width="2.2" stroke-linejoin="round"/><rect x="7.5" y="18" width="6.5" height="14" rx="2" fill="#ffe6cf" stroke="#c98b54" stroke-width="2.2"/></svg>',
+  cake:'<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><path d="M7 22h26v7a3 3 0 0 1-3 3H10a3 3 0 0 1-3-3z" fill="#ffe9c2" stroke="#c9a05a" stroke-width="2.2"/><path d="M7 22 20 12l13 10z" fill="#fff3f5" stroke="#c9a05a" stroke-width="2.2" stroke-linejoin="round"/><path d="M7 22h26" stroke="#e7b9c6" stroke-width="2"/><circle cx="20" cy="13.5" r="3.2" fill="#ff6b8a" stroke="#d23a5b" stroke-width="1.8"/></svg>'
+};
+const REACTIONS=['i:heart','i:star','i:flower','i:smile','i:good','i:cake','❤️','😆','✨','🎉'];
+function reactionGlyph(v){
+  if(typeof v==='string' && v.slice(0,2)==='i:'){ return ILLUS[v.slice(2)]||''; }
+  return '<span class="rx-emoji">'+(v||'').replace(/[&<>"]/g,'')+'</span>';
+}
+function renderReactionButtons(){
+  const el=document.getElementById('reactBtns'); if(!el) return; el.innerHTML='';
+  REACTIONS.forEach(v=>{ const b=document.createElement('button'); b.type='button'; b.dataset.react=v; b.innerHTML=reactionGlyph(v); b.onclick=()=>reactTo(v,b); el.appendChild(b); });
+}
+async function reactTo(v,btn){
+  const e=entries[viewIdx];
+  if(!e||!e._key){ showToast('まだ日記がないよ'); return; }
+  if(!(FB_ON&&roomStoreKey)){ showToast('つうしんにつながっていません'); return; }
+  if(btn){ btn.classList.remove('pop'); void btn.offsetWidth; btn.classList.add('pop'); }
+  const cur=(e.reactions&&e.reactions[clientId])||null;
+  try{
+    const rref=_fb.ref(db,'rooms/'+roomStoreKey+'/entries/'+e._key+'/reactions/'+clientId);
+    if(cur===v){ await _fb.remove(rref); } else { await _fb.set(rref, v); }
+  }catch(_){ showToast('うまくいきませんでした'); }
+}
 let mode='pen', penColor=COLORS[0], penType='normal', currentStamp={type:'emoji',val:STAMPS[0]};
 const miiCanvas=[];
 
@@ -656,7 +690,12 @@ function renderReactions(e){
   if(!r){ reactDisplayEl.innerHTML='<span class="none">リアクションしてみよう</span>'; return; }
   const counts={};
   for(const k in r){ const v=r[k]; counts[v]=(counts[v]||0)+1; }
-  reactDisplayEl.innerHTML=Object.keys(counts).map(em=>esc(em)+(counts[em]>1?'<small style="font-size:11px;font-weight:800;color:#888;">'+counts[em]+'</small>':'')).join(' ') || '<span class="none">リアクションしてみよう</span>';
+  const keys=Object.keys(counts);
+  if(!keys.length){ reactDisplayEl.innerHTML='<span class="none">リアクションしてみよう</span>'; return; }
+  reactDisplayEl.innerHTML=keys.map((v,idx)=>{
+    const rot=((idx*53)%7)-3; // 手描きっぽい、ほんの少しのかたむき
+    return '<span class="rx" style="transform:rotate('+rot+'deg)">'+reactionGlyph(v)+(counts[v]>1?'<b class="rx-n">'+counts[v]+'</b>':'')+'</span>';
+  }).join('');
 }
 
 function renderTop(anim=''){
@@ -702,20 +741,8 @@ function renderTop(anim=''){
 prevBtn.onclick=()=>{if(viewIdx>0){viewIdx--; viewSubIdx=0; renderTop('slide-prev');}};
 nextBtn.onclick=()=>{if(viewIdx<entries.length-1){viewIdx++; viewSubIdx=0; renderTop('slide-next');}};
 
-// リアクション：今見ている日記に自分の反応を付ける（同じものをもう一度押すと取り消し）
-document.querySelectorAll('#reactBtns button').forEach(b=>{
-  b.onclick=async()=>{
-    const e=entries[viewIdx];
-    if(!e||!e._key){ showToast('まだ日記がないよ'); return; }
-    if(!(FB_ON&&roomStoreKey)){ showToast('つうしんにつながっていません'); return; }
-    const em=b.dataset.react;
-    const cur=(e.reactions&&e.reactions[clientId])||null;
-    try{
-      const rref=_fb.ref(db,'rooms/'+roomStoreKey+'/entries/'+e._key+'/reactions/'+clientId);
-      if(cur===em){ await _fb.remove(rref); } else { await _fb.set(rref, em); }
-    }catch(_){ showToast('うまくいきませんでした'); }
-  };
-});
+// リアクション：絵文字＋手描きイラストのボタンを生成（同じものをもう一度押すと取り消し）
+renderReactionButtons();
 
 // ★修正：容量・解像度を安全なサイズ（800x480）に固定して書き出す
 function flattenURL(){
