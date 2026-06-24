@@ -4,6 +4,10 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 <title>イラストこうかん日記</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#8cc63f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="こうかん日記">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;500;700;800&display=swap" rel="stylesheet">
@@ -17,13 +21,14 @@
   }
 
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  html, body { margin: 0; height: 100%; }
+  html, body { margin: 0; min-height: 100%; }
 
   body {
     font-family: "M PLUS Rounded 1c", system-ui, sans-serif;
     color: var(--text-main);
-    display: flex; align-items: center; justify-content: center;
-    padding: 12px; min-height: 100%; overflow-x: hidden;
+    /* 縦は上ぞろえ：画面より縦長でも上部（ボタン類）が切れず必ずスクロールで届く */
+    display: flex; align-items: flex-start; justify-content: center;
+    padding: 12px; min-height: 100vh; overflow-x: hidden;
     background-color: var(--desk-bg);
     background-image: radial-gradient(rgba(180, 170, 150, 0.5) 2px, transparent 2px);
     background-size: 24px 24px;
@@ -54,8 +59,8 @@
   /* デバイス本体 */
   .device { width: min(440px, 100%); background: var(--device-body); border-radius: 16px; padding: 12px; border: 2px solid #cecece; box-shadow: inset 0 -4px 0 rgba(0,0,0,0.05), var(--shadow-box); }
   .brand { text-align: center; font-weight: 800; font-size: 12px; color: #bbb; margin: 0 0 10px; letter-spacing: 0.1em; }
-  .roombar { display: flex; align-items: center; justify-content: space-between; background: #e8e8e8; border-radius: 8px; padding: 8px 12px; margin-bottom: 10px; }
-  .roomno { font-weight: 800; font-size: 13px; color: var(--text-main); }
+  .roombar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px; background: #e8e8e8; border-radius: 8px; padding: 8px 12px; margin-bottom: 10px; }
+  .roomno { font-weight: 800; font-size: 13px; color: var(--text-main); display: flex; align-items: center; }
   .roomno b { color: var(--n-red); font-size: 15px; }
   .acts { display: flex; gap: 4px; }
   .icbtn { font-weight: 800; font-size: 11px; padding: 6px 8px; border-radius: 6px; background: #fff; border: 2px solid #ccc; color: var(--text-main); display: flex; align-items: center; gap: 4px; box-shadow: 0 2px 0 #ccc; position: relative; }
@@ -161,6 +166,64 @@
   .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%) translateY(20px); font-weight: 800; font-size: 13px; color: #fff; background: rgba(0,0,0,0.8); padding: 10px 20px; border-radius: 999px; opacity: 0; pointer-events: none; transition: 0.3s; z-index: 100; }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
   .hidden { display: none !important; }
+
+  /* ひとことコメント表示 */
+  .caption { position: absolute; left: 8px; right: 8px; bottom: 40px; text-align: center; font-weight: 800; font-size: 13px; color: var(--text-main); background: rgba(255,255,255,0.88); border-radius: 6px; padding: 3px 6px; z-index: 4; line-height: 1.3; }
+  .caption:empty { display: none; }
+
+  /* リアクション */
+  .reactRow { display: flex; align-items: center; gap: 8px; margin: 0 0 12px; flex-wrap: wrap; }
+  .reactDisplay { flex: 1; min-width: 120px; min-height: 30px; display: flex; align-items: center; gap: 4px; font-size: 18px; background: #f0ecf0; border-radius: 8px; padding: 4px 10px; }
+  .reactDisplay .none { font-size: 11px; color: #aaa; font-weight: 800; }
+  .reactBtns { display: flex; gap: 4px; }
+  .reactBtns button { font-size: 18px; padding: 5px 7px; border-radius: 8px; background: #fff; border: 2px solid #ddd; box-shadow: 0 2px 0 #ddd; line-height: 1; }
+  .reactBtns button.on { border-color: var(--n-red); background: #ffe3ea; box-shadow: 0 2px 0 var(--n-red-dark); }
+
+  /* コメント入力 */
+  .comment-field { display: flex; align-items: center; gap: 6px; background: #222; border-radius: 6px; padding: 6px 8px; margin-top: 2px; }
+  .comment-field > span { font-size: 16px; }
+  #commentInput { flex: 1; font-family: inherit; font-weight: 800; font-size: 13px; padding: 8px; border: 2px solid #444; border-radius: 6px; background: #fff; color: var(--text-main); outline: none; }
+  #commentInput:focus { border-color: var(--n-blue); }
+
+  /* カレンダー */
+  .cal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .cal-head button { background: #fff; border: 2px solid #ccc; border-radius: 6px; padding: 4px 12px; font-weight: 800; box-shadow: 0 2px 0 #ccc; color: var(--text-main); font-size: 14px; }
+  .cal-title { font-weight: 800; font-size: 15px; color: var(--text-main); }
+  .cal-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 3px; }
+  .cal-grid .dow { text-align: center; font-size: 11px; font-weight: 800; color: var(--text-sub); padding: 2px 0; }
+  .cal-cell { aspect-ratio: 1; border-radius: 6px; background: #efeaf0; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; color: #bbb; position: relative; }
+  .cal-cell.blank { background: transparent; }
+  .cal-cell.has { background: #eaf5e1; color: var(--text-main); border: 2px solid var(--n-green); }
+  .cal-cell.has .dot { position: absolute; bottom: 3px; width: 5px; height: 5px; border-radius: 50%; background: var(--n-green-dark); }
+  .cal-cell.today { outline: 2px solid var(--n-blue); outline-offset: 1px; }
+
+  .icbtn.invite { color: var(--n-blue); border-color: var(--n-blue); box-shadow: 0 2px 0 var(--n-blue-dark); }
+  .acts { display: flex; gap: 4px; flex-wrap: wrap; justify-content: flex-end; }
+
+  /* せまいスマホ向け調整（〜400px） */
+  @media (max-width: 400px) {
+    body { padding: 6px; }
+    .device { padding: 8px; }
+    .roombar { padding: 7px 8px; }
+    .roomno { font-size: 12px; }
+    .roomno b { font-size: 14px; }
+    .icbtn { font-size: 10px; padding: 5px 6px; gap: 3px; }
+    .icbtn.invite { margin-left: 4px !important; }
+    .presence { font-size: 10px; padding: 6px; }
+    .shareRow button { font-size: 11px; padding: 9px; }
+    .reactDisplay { min-width: 84px; font-size: 16px; padding: 4px 6px; }
+    .reactBtns button { font-size: 15px; padding: 4px 5px; }
+    .caption { font-size: 12px; bottom: 38px; }
+    .tab { padding: 6px 10px; }
+    #commentInput { font-size: 12px; padding: 7px; }
+    .sheet { padding: 16px; }
+    .cal-cell { font-size: 11px; }
+  }
+  /* ごく小さい端末（〜340px）はさらに詰める */
+  @media (max-width: 340px) {
+    .icbtn { font-size: 9px; padding: 4px 5px; }
+    .reactBtns button { font-size: 14px; padding: 3px 4px; }
+  }
 </style>
 </head>
 <body>
@@ -182,8 +245,9 @@
     <p class="brand">イラストこうかん日記</p>
 
     <div class="roombar">
-      <span class="roomno">へや: <b id="roomNo">----</b></span>
+      <span class="roomno">へや: <b id="roomNo">----</b> <button class="icbtn invite" id="invite" style="margin-left:6px;">さそう</button></span>
       <span class="acts">
+        <button class="icbtn" id="history">れきし</button>
         <button class="icbtn" id="settings">設定</button>
         <button class="icbtn" id="refresh">更新 <span class="badge" id="badge">0</span></button>
         <button class="icbtn" id="leave">出る</button>
@@ -199,9 +263,22 @@
         <div id="empty" class="empty">まだ日記がありません。<br>下のがめんに描いて<br>「日記を書く」をおそう！</div>
         <div id="avatar" class="avatar" hidden></div>
         <div id="dateLabel" class="date" hidden></div>
+        <div id="caption" class="caption"></div>
         <div id="pagenum" class="pagenum hidden">1</div>
         <button class="nav prev" id="prev">&lsaquo;</button>
         <button class="nav next" id="next">&rsaquo;</button>
+      </div>
+    </div>
+
+    <!-- リアクション -->
+    <div class="reactRow" id="reactRow">
+      <div class="reactDisplay" id="reactDisplay"></div>
+      <div class="reactBtns" id="reactBtns">
+        <button data-react="❤️">❤️</button>
+        <button data-react="😆">😆</button>
+        <button data-react="✨">✨</button>
+        <button data-react="👍">👍</button>
+        <button data-react="🎉">🎉</button>
       </div>
     </div>
 
@@ -259,6 +336,11 @@
           <span id="stamps" style="display:flex; gap:4px;"></span>
         </div>
 
+        <div class="comment-field">
+          <span>💬</span>
+          <input id="commentInput" maxlength="30" placeholder="ひとこと（さいだい30もじ）" autocomplete="off" />
+        </div>
+
         <button class="save" id="save"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 6"/></svg> 日記を書く</button>
       </div>
     </div>
@@ -293,6 +375,20 @@
       </div>
     </div>
   </div>
+  <!-- 履歴カレンダー -->
+  <div class="modal" id="calModal">
+    <div class="sheet">
+      <h2>れきしカレンダー</h2>
+      <div class="cal-head">
+        <button id="calPrev">◀</button>
+        <div class="cal-title" id="calTitle">----</div>
+        <button id="calNext">▶</button>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+      <button class="done" id="calClose" style="margin-top:14px; background:#888; box-shadow:0 3px 0 #666;">とじる</button>
+    </div>
+  </div>
+
   <div class="toast" id="toast">かけたよ！</div>
 
 <script>
@@ -333,7 +429,7 @@ function fbAttach(key){
   fbDetach(); // 念のため二重登録を防ぐ
   entriesRef=_fb.ref(db,'rooms/'+key+'/entries'); presRef=_fb.ref(db,'rooms/'+key+'/presence'); myPresRef=_fb.ref(db,'rooms/'+key+'/presence/'+clientId); _firstLoad=true;
   const u1=_fb.onValue(entriesRef, snap=>{
-    const val=snap.val()||{}; const arr=Object.keys(val).map(k=>val[k]).filter(Boolean).sort((a,b)=>((a.ts||0)-(b.ts||0)));
+    const val=snap.val()||{}; const arr=Object.keys(val).map(k=>val[k]?Object.assign({_key:k},val[k]):null).filter(Boolean).sort((a,b)=>((a.ts||0)-(b.ts||0)));
     const grew=arr.length-entries.length; const wasLast=(viewIdx>=entries.length-1); entries=arr;
     if(_firstLoad){viewIdx=Math.max(0,entries.length-1);setBadge(0);_firstLoad=false;renderTop();}
     else if(grew>0){
@@ -371,7 +467,7 @@ function avatarSVG(id){
 }
 const AV_COUNT=6;
 
-const COLORS=["#3a3540","#eb5c5c","#5cb8e6","#8cc63f","#f2c94c","#ffffff"];
+const COLORS=["#3a3540","#9b9b9b","#ffffff","#eb5c5c","#ff8a4c","#f2c94c","#fff27a","#8cc63f","#2f9a52","#5cb8e6","#3f7fe0","#8b5cf6","#e85aa0","#ffc1cc","#a9744f","#000000"];
 const STAMPS=["⭐","❤️","🌸","😊","🎀","🐱","🍀","✨"];
 let mode='pen', penColor=COLORS[0], penType='normal', currentStamp={type:'emoji',val:STAMPS[0]};
 const miiCanvas=[];
@@ -437,8 +533,8 @@ function loadDraft(idx){
   ctx.clearRect(0,0,cv.width,cv.height);
   if(drafts[idx]) ctx.putImageData(drafts[idx],0,0);
 }
-document.getElementById('draftPrev').onclick=()=>{if(currentDraftIdx>0){saveDraft();loadDraft(currentDraftIdx-1);}};
-document.getElementById('draftNext').onclick=()=>{if(currentDraftIdx<MAX_PAGES-1){saveDraft();loadDraft(currentDraftIdx+1);}};
+document.getElementById('draftPrev').onclick=()=>{if(currentDraftIdx>0){saveDraft();loadDraft(currentDraftIdx-1);scheduleAutosave();}};
+document.getElementById('draftNext').onclick=()=>{if(currentDraftIdx<MAX_PAGES-1){saveDraft();loadDraft(currentDraftIdx+1);scheduleAutosave();}};
 
 let drawing=false,lastX=0,lastY=0;
 function pos(e){const r=cv.getBoundingClientRect();return{x:(e.clientX-r.left)*DPR,y:(e.clientY-r.top)*DPR};}
@@ -448,7 +544,7 @@ function getPenWidth(){ return mode==='eraser'? 20*DPR : penType==='bold'? 7*DPR
 function start(e){
   const p=pos(e); if(mode==='stamp'){pushUndo();ctx.globalCompositeOperation='source-over';ctx.globalAlpha=1.0;
     if(currentStamp.type==='emoji'){ctx.font=(46*DPR)+'px serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(currentStamp.val,p.x,p.y);}
-    else{const id=currentStamp.val,s=72*DPR,src=miiCanvas[id]; if(src)ctx.drawImage(src,p.x-s/2,p.y-s/2,s,s); else{const im=new Image();im.onload=()=>ctx.drawImage(im,p.x-s/2,p.y-s/2,s,s);im.src=avatarDataURI(id,96);}} return;}
+    else{const id=currentStamp.val,s=72*DPR,src=miiCanvas[id]; if(src)ctx.drawImage(src,p.x-s/2,p.y-s/2,s,s); else{const im=new Image();im.onload=()=>{ctx.drawImage(im,p.x-s/2,p.y-s/2,s,s);scheduleAutosave();};im.src=avatarDataURI(id,96);}} scheduleAutosave(); return;}
   drawing=true;pushUndo();lastX=p.x;lastY=p.y;
   ctx.globalCompositeOperation=mode==='eraser'?'destination-out':'source-over'; ctx.globalAlpha=(mode==='pen'&&penType==='marker')?0.35:1.0;
   ctx.lineCap='round'; ctx.lineJoin='round'; ctx.beginPath();ctx.fillStyle=mode==='eraser'?'rgba(0,0,0,1)':penColor; ctx.arc(p.x,p.y,getPenWidth()/2,0,Math.PI*2);ctx.fill(); cv.setPointerCapture&&cv.setPointerCapture(e.pointerId);
@@ -456,7 +552,7 @@ function start(e){
 function move(e){if(!drawing)return;const p=pos(e);
   ctx.strokeStyle=mode==='eraser'?'rgba(0,0,0,1)':penColor; ctx.lineWidth=getPenWidth();
   ctx.beginPath(); ctx.moveTo(lastX,lastY); ctx.lineTo(p.x, p.y); ctx.stroke(); lastX=p.x;lastY=p.y;}
-function end(){drawing=false;ctx.globalCompositeOperation='source-over';ctx.globalAlpha=1.0;}
+function end(){if(drawing)scheduleAutosave();drawing=false;ctx.globalCompositeOperation='source-over';ctx.globalAlpha=1.0;}
 cv.addEventListener('pointerdown',e=>{e.preventDefault();start(e);}); cv.addEventListener('pointermove',e=>{e.preventDefault();move(e);}); cv.addEventListener('pointerup',end);cv.addEventListener('pointercancel',end);cv.addEventListener('pointerleave',end);
 
 const colorsEl=document.getElementById('colors');
@@ -464,8 +560,8 @@ COLORS.forEach((c,i)=>{const b=document.createElement('button');b.className='sw'
   b.onclick=()=>{penColor=c;mode='pen';document.querySelectorAll('.sw').forEach(s=>s.classList.remove('on'));b.classList.add('on');eraserBtn.classList.remove('on');document.querySelectorAll('.stamp-btn').forEach(s=>s.classList.remove('on'));}; colorsEl.appendChild(b);});
 const eraserBtn=document.getElementById('eraser');
 eraserBtn.onclick=()=>{mode=mode==='eraser'?'pen':'eraser';eraserBtn.classList.toggle('on',mode==='eraser'); if(mode==='eraser')document.querySelectorAll('.sw,.stamp-btn').forEach(s=>s.classList.remove('on'));};
-document.getElementById('undo').onclick=()=>{if(undoStacks[currentDraftIdx].length)ctx.putImageData(undoStacks[currentDraftIdx].pop(),0,0);};
-document.getElementById('clear').onclick=()=>{pushUndo();ctx.clearRect(0,0,cv.width,cv.height);};
+document.getElementById('undo').onclick=()=>{if(undoStacks[currentDraftIdx].length){ctx.putImageData(undoStacks[currentDraftIdx].pop(),0,0);scheduleAutosave();}};
+document.getElementById('clear').onclick=()=>{pushUndo();ctx.clearRect(0,0,cv.width,cv.height);scheduleAutosave();};
 
 function setPenType(type, btnId){
   penType=type; ['penNormal','penBold','penMarker'].forEach(id=>document.getElementById(id).classList.remove('on')); document.getElementById(btnId).classList.add('on'); mode='pen'; eraserBtn.classList.remove('on'); document.querySelectorAll('.stamp-btn').forEach(s=>s.classList.remove('on'));
@@ -478,9 +574,9 @@ function renderStamps(){
   STAMPS.forEach(s=>{ const b=document.createElement('button'); b.className='stamp-btn'; b.textContent=s; b.onclick=()=>{mode='stamp';currentStamp={type:'emoji',val:s};document.querySelectorAll('.stamp-btn,.sw,#eraser').forEach(x=>x.classList.remove('on'));b.classList.add('on');showToast('えがめんを タップ');}; el.appendChild(b); });
 }
 
-document.querySelectorAll('[data-bg]').forEach(b=>{b.onclick=()=>{bgType=b.dataset.bg; currentBgPhoto=null; document.querySelectorAll('[data-bg], #bgPhotoBtn').forEach(x=>x.classList.remove('on')); b.classList.add('on'); drawTemplate();};});
+document.querySelectorAll('[data-bg]').forEach(b=>{b.onclick=()=>{bgType=b.dataset.bg; currentBgPhoto=null; document.querySelectorAll('[data-bg], #bgPhotoBtn').forEach(x=>x.classList.remove('on')); b.classList.add('on'); drawTemplate(); scheduleAutosave();};});
 document.getElementById('bgPhotoBtn').onclick=()=>document.getElementById('bgPhotoInput').click();
-document.getElementById('bgPhotoInput').onchange=(e)=>{const f=e.target.files[0];if(!f)return; const im=new Image(); im.onload=()=>{currentBgPhoto=im; document.querySelectorAll('[data-bg]').forEach(x=>x.classList.remove('on')); document.getElementById('bgPhotoBtn').classList.add('on'); bgType='photo'; drawTemplate();}; im.src=URL.createObjectURL(f);};
+document.getElementById('bgPhotoInput').onchange=(e)=>{const f=e.target.files[0];if(!f)return; const im=new Image(); im.onload=()=>{currentBgPhoto=im; document.querySelectorAll('[data-bg]').forEach(x=>x.classList.remove('on')); document.getElementById('bgPhotoBtn').classList.add('on'); bgType='photo'; drawTemplate(); scheduleAutosave();}; im.src=URL.createObjectURL(f);};
 
 const tabMe=document.getElementById('tabMe'),tabYou=document.getElementById('tabYou');
 function renderTabs(){ document.getElementById('miniMe').innerHTML=avatarSVG(profile.me.avatar); document.getElementById('miniYou').innerHTML=avatarSVG(profile.you.avatar); }
@@ -494,9 +590,74 @@ const _ws=(typeof window!=='undefined'&&window.storage&&window.storage.get)?wind
 async function kvGet(k,sh){if(_ws){try{return await _ws.get(k,sh);}catch(_){}} try{const v=localStorage.getItem(k);return v!=null?{value:v}:null;}catch(_){return _mem[k]!=null?{value:_mem[k]}:null;}}
 async function kvSet(k,v,sh){if(_ws){try{await _ws.set(k,v,sh);return;}catch(_){}} try{localStorage.setItem(k,v);}catch(_){_mem[k]=v;}}
 
+/* ==== 下書きの自動保存（端末内・へやごと） ==== */
+let _autosaveTimer=null;
+function hasAnyContent(){
+  for(let i=0;i<MAX_PAGES;i++){
+    if(draftBgs[i]&&draftBgs[i]!=='plain') return true;
+    const d=drafts[i]&&drafts[i].data;
+    if(d){ for(let j=3;j<d.length;j+=40){ if(d[j]>0) return true; } }
+  }
+  return false;
+}
+function pageToDataURL(imgData){
+  if(!imgData) return null;
+  const t=document.createElement('canvas'); t.width=imgData.width; t.height=imgData.height;
+  t.getContext('2d').putImageData(imgData,0,0);
+  return t.toDataURL('image/png');
+}
+function scheduleAutosave(){ if(!roomStoreKey) return; clearTimeout(_autosaveTimer); _autosaveTimer=setTimeout(saveLocalDraftNow, 700); }
+function saveLocalDraftNow(){
+  if(!roomStoreKey) return;
+  try{
+    saveDraft();
+    if(!hasAnyContent()){ clearLocalDraft(); return; }
+    const data={ pages:drafts.map(pageToDataURL), bgs:draftBgs.slice(), comment:(document.getElementById('commentInput').value||''), ts:Date.now() };
+    kvSet('nikki:draft:'+roomStoreKey, JSON.stringify(data), false);
+  }catch(_){}
+}
+function clearLocalDraft(){ if(!roomStoreKey) return; try{ kvSet('nikki:draft:'+roomStoreKey,'',false); }catch(_){} }
+async function restoreLocalDraft(){
+  if(!roomStoreKey) return;
+  let r; try{ r=await kvGet('nikki:draft:'+roomStoreKey,false); }catch(_){ return; }
+  if(!r||!r.value) return;
+  let data; try{ data=JSON.parse(r.value); }catch(_){ return; }
+  if(!data||!data.pages) return;
+  for(let i=0;i<MAX_PAGES;i++){
+    draftBgs[i]=(data.bgs&&data.bgs[i])?data.bgs[i]:'plain';
+    if(draftBgs[i]==='photo') draftBgs[i]='plain'; // 写真背景は復元しない
+    draftPhotos[i]=null;
+    const src=data.pages&&data.pages[i];
+    if(src){
+      try{
+        const im=await loadImg(src);
+        const t=document.createElement('canvas'); t.width=cv.width; t.height=cv.height;
+        const tx=t.getContext('2d'); tx.drawImage(im,0,0,cv.width,cv.height);
+        drafts[i]=tx.getImageData(0,0,cv.width,cv.height);
+      }catch(_){ drafts[i]=null; }
+    } else drafts[i]=null;
+  }
+  if(data.comment) document.getElementById('commentInput').value=data.comment;
+  loadDraft(0);
+  if(hasAnyContent()) showToast('かきかけを ふくげんしたよ');
+}
+document.getElementById('commentInput').oninput=scheduleAutosave;
+
 /* ==== トップ画面再生ロジック ==== */
 let playTimer=null, viewSubIdx=0;
 const img=document.getElementById('entryImg'), empty=document.getElementById('empty'), avatarEl=document.getElementById('avatar'), dateEl=document.getElementById('dateLabel'), pageEl=document.getElementById('pagenum'), prevBtn=document.getElementById('prev'), nextBtn=document.getElementById('next');
+const captionEl=document.getElementById('caption'), reactDisplayEl=document.getElementById('reactDisplay'), reactRowEl=document.getElementById('reactRow');
+
+function esc(s){return (s||'').replace(/[&<>"]/g,'');}
+function renderReactions(e){
+  const r=e&&e.reactions?e.reactions:null;
+  const myReact = r&&r[clientId] ? r[clientId] : null;
+  document.querySelectorAll('#reactBtns button').forEach(b=>b.classList.toggle('on', b.dataset.react===myReact));
+  if(!r){ reactDisplayEl.innerHTML='<span class="none">リアクションしてみよう</span>'; return; }
+  const counts={};
+  for(const k in r){ const v=r[k]; counts[v]=(counts[v]||0)+1; }
+  reactDisplayEl.innerHTML=Object.keys(counts).map(em=>esc(em)+(counts[em]>1?'<small style="font-size:11px;font-weight:800;color:#888;">'+counts[em]+'</small>':'')).join(' ') || '<span class="none">リアクションしてみよう</span>';
+}
 
 function renderTop(anim=''){
   if(playTimer){clearInterval(playTimer); playTimer=null;}
@@ -504,9 +665,11 @@ function renderTop(anim=''){
   if(!entries || entries.length===0){
     empty.hidden=false; img.hidden=true; avatarEl.hidden=true; dateEl.hidden=true;
     pageEl.classList.add('hidden'); // HTMLのhiddenではなくクラスで確実に消す
+    captionEl.textContent=''; reactRowEl.style.display='none';
     prevBtn.classList.remove('show'); nextBtn.classList.remove('show');
     return;
   }
+  reactRowEl.style.display='flex';
   
   empty.hidden=true; img.hidden=false; avatarEl.hidden=false; dateEl.hidden=false;
   pageEl.classList.remove('hidden');
@@ -523,6 +686,8 @@ function renderTop(anim=''){
 
   avatarEl.innerHTML=avatarSVG(e.avatarId!=null?e.avatarId:0)+'<div class="nm">'+(e.name||'').replace(/[&<>"]/g,'')+'</div>';
   dateEl.innerHTML=(e.dateLabel||'').replace(/^\d+\//,'');
+  captionEl.textContent=esc(e.comment||'');
+  renderReactions(e);
   pageEl.textContent=(viewIdx+1);
   prevBtn.classList.toggle('show',viewIdx>0); nextBtn.classList.toggle('show',viewIdx<entries.length-1);
 
@@ -536,6 +701,21 @@ function renderTop(anim=''){
 }
 prevBtn.onclick=()=>{if(viewIdx>0){viewIdx--; viewSubIdx=0; renderTop('slide-prev');}};
 nextBtn.onclick=()=>{if(viewIdx<entries.length-1){viewIdx++; viewSubIdx=0; renderTop('slide-next');}};
+
+// リアクション：今見ている日記に自分の反応を付ける（同じものをもう一度押すと取り消し）
+document.querySelectorAll('#reactBtns button').forEach(b=>{
+  b.onclick=async()=>{
+    const e=entries[viewIdx];
+    if(!e||!e._key){ showToast('まだ日記がないよ'); return; }
+    if(!(FB_ON&&roomStoreKey)){ showToast('つうしんにつながっていません'); return; }
+    const em=b.dataset.react;
+    const cur=(e.reactions&&e.reactions[clientId])||null;
+    try{
+      const rref=_fb.ref(db,'rooms/'+roomStoreKey+'/entries/'+e._key+'/reactions/'+clientId);
+      if(cur===em){ await _fb.remove(rref); } else { await _fb.set(rref, em); }
+    }catch(_){ showToast('うまくいきませんでした'); }
+  };
+});
 
 // ★修正：容量・解像度を安全なサイズ（800x480）に固定して書き出す
 function flattenURL(){
@@ -575,7 +755,8 @@ document.getElementById('save').onclick=async()=>{
     loadDraft(currentDraftIdx);
 
     const prof=author==='me'?profile.me:profile.you;
-    const entry={name:prof.name,avatarId:prof.avatar,cid:clientId,dateLabel:todayLabel(),image:pagesData[0],pages:pagesData,ts:Date.now()};
+    const comment=(document.getElementById('commentInput').value||'').trim().slice(0,30);
+    const entry={name:prof.name,avatarId:prof.avatar,cid:clientId,comment:comment,dateLabel:todayLabel(),image:pagesData[0],pages:pagesData,ts:Date.now()};
 
     // 共有は必須。つながっていなければ送信しない（描いた絵は消さない）
     if(!(FB_ON&&entriesRef)){
@@ -596,6 +777,8 @@ document.getElementById('save').onclick=async()=>{
     // 送信が成功した時のみキャンバスを真っ白にする
     if(success){
       drafts=[null,null,null,null]; draftBgs=['plain','plain','plain','plain']; draftPhotos=[null,null,null,null]; undoStacks=[[],[],[],[]];
+      document.getElementById('commentInput').value='';
+      clearLocalDraft();
       loadDraft(0);
       showToast('かけたよ！');
     }
@@ -658,7 +841,7 @@ async function enterRoom(w){
   document.getElementById('roomNo').textContent='No.'+number;
   document.getElementById('lock').classList.add('hidden');
   document.getElementById('device').classList.remove('hidden');
-  requestAnimationFrame(()=>{fitCanvas();loadDraft(0);});
+  requestAnimationFrame(()=>{fitCanvas();loadDraft(0);restoreLocalDraft();});
   fbDetach(); entries=[]; viewIdx=0; viewSubIdx=0; setBadge(0); renderTop(); fbAttach(key);
   await addRecent(w,number);
   try{await kvSet('nikki:lastword',w,false);}catch(_){}
@@ -673,6 +856,48 @@ document.getElementById('leave').onclick=async()=>{
   document.getElementById('lock').classList.remove('hidden');
   try{await kvSet('nikki:lastword','',false);}catch(_){}
   renderChips(); document.getElementById('word').focus();
+};
+
+/* ===== 履歴カレンダー ===== */
+let calYear, calMonth;
+const calModal=document.getElementById('calModal');
+function openCalendar(){
+  if(!entries.length){showToast('まだ日記がないよ');return;}
+  const base=new Date(entries[entries.length-1].ts||Date.now());
+  calYear=base.getFullYear(); calMonth=base.getMonth();
+  renderCalendar(); calModal.classList.add('show');
+}
+function renderCalendar(){
+  document.getElementById('calTitle').textContent=calYear+'年'+(calMonth+1)+'月';
+  const grid=document.getElementById('calGrid'); grid.innerHTML='';
+  ['日','月','火','水','木','金','土'].forEach(d=>{const c=document.createElement('div');c.className='dow';c.textContent=d;grid.appendChild(c);});
+  const map={};
+  entries.forEach((e,i)=>{ if(e.ts==null)return; const d=new Date(e.ts); if(d.getFullYear()===calYear&&d.getMonth()===calMonth) map[d.getDate()]=i; });
+  const first=new Date(calYear,calMonth,1).getDay();
+  const days=new Date(calYear,calMonth+1,0).getDate();
+  const now=new Date();
+  for(let i=0;i<first;i++){const c=document.createElement('div');c.className='cal-cell blank';grid.appendChild(c);}
+  for(let dnum=1;dnum<=days;dnum++){
+    const c=document.createElement('div'); c.className='cal-cell'; c.textContent=dnum;
+    if(now.getFullYear()===calYear&&now.getMonth()===calMonth&&now.getDate()===dnum) c.classList.add('today');
+    if(map[dnum]!=null){ c.classList.add('has'); const dot=document.createElement('div'); dot.className='dot'; c.appendChild(dot);
+      c.onclick=()=>{ viewIdx=map[dnum]; viewSubIdx=0; setBadge(0); renderTop(); calModal.classList.remove('show'); }; }
+    grid.appendChild(c);
+  }
+}
+document.getElementById('history').onclick=openCalendar;
+document.getElementById('calPrev').onclick=()=>{calMonth--; if(calMonth<0){calMonth=11;calYear--;} renderCalendar();};
+document.getElementById('calNext').onclick=()=>{calMonth++; if(calMonth>11){calMonth=0;calYear++;} renderCalendar();};
+document.getElementById('calClose').onclick=()=>calModal.classList.remove('show');
+calModal.onclick=e=>{if(e.target===calModal)calModal.classList.remove('show');};
+
+/* ===== さそう（あいことばを共有） ===== */
+document.getElementById('invite').onclick=async()=>{
+  if(!currentWord){showToast('へやに入ってからね');return;}
+  const text='いっしょに「イラストこうかん日記」やろう！\nあいことば：'+currentWord+'\nおなじあいことばで へやに入ってね。';
+  try{ if(navigator.share){ await navigator.share({title:'イラストこうかん日記',text:text}); return; } }catch(_){ return; }
+  try{ await navigator.clipboard.writeText(text); showToast('あいことばをコピーしたよ！'); }
+  catch(_){ showToast('あいことば：'+currentWord); }
 };
 
 function todayLabel(){const d=new Date();const w=['日','月','火','水','木','金','土'][d.getDay()];
@@ -691,6 +916,7 @@ async function composeCard(e){
   
   const mw=W-220,mh=H-310,r=Math.min(mw/im.width,mh/im.height);
   const dw=im.width*r,dh=im.height*r;x.drawImage(im,(W-dw)/2,75,dw,dh);
+  if(e.comment){ x.textAlign='center'; x.fillStyle='#5a5366'; x.font='700 26px "M PLUS Rounded 1c",sans-serif'; x.fillText(e.comment, W/2, Math.min(75+dh+34, H-176)); }
   try{const av=await loadImg(avatarDataURI(e.avatarId!=null?e.avatarId:0,180));x.drawImage(av,52,H-152,90,90);}catch(_){}
   x.textAlign='left';x.fillStyle='#6f6880';x.font='700 32px "M PLUS Rounded 1c",sans-serif';x.fillText(e.name||'',150,H-92);
   x.textAlign='center';x.fillStyle='#8a7e9c';x.font='700 30px sans-serif';x.fillText(e.dateLabel,W/2,H-46);
@@ -713,6 +939,8 @@ document.getElementById('shareImg').onclick=async()=>{
   const a=document.createElement('a');a.href=url;a.download='koukan_nikki.png';document.body.appendChild(a);a.click();a.remove();
   showToast('シェアにたいおうしてないので ほぞんしたよ');
 };
+
+if('serviceWorker' in navigator){ window.addEventListener('load',()=>{ navigator.serviceWorker.register('sw.js').catch(()=>{}); }); }
 
 (async function init(){
   for(let i=0;i<AV_COUNT;i++) preloadCustomMii(i);
